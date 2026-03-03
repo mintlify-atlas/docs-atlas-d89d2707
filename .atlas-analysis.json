@@ -1,0 +1,96 @@
+{
+  "projectType": "frontend",
+  "projectName": "Cite Unseen",
+  "projectDescription": "A Wikipedia user script that adds categorical icons to citations for quick reliability evaluation",
+  "theme": "palm",
+  "primaryColor": "#3366CC",
+  "lightColor": "#6699FF",
+  "darkColor": "#003399",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "User Guide",
+            "pages": [
+              "guide/understanding-categories",
+              "guide/using-dashboard",
+              "guide/customization"
+            ]
+          },
+          {
+            "group": "Categories",
+            "pages": [
+              "categories/reliability-ratings",
+              "categories/content-types",
+              "categories/special-categories"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/custom-domains",
+              "advanced/configuration",
+              "advanced/localization"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Contributing",
+            "pages": [
+              "development/overview",
+              "development/code-structure",
+              "development/building",
+              "development/contributing"
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+              "api/core-functions",
+              "api/configuration-options",
+              "api/data-structures"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Citation categorization with visual icons",
+    "Reliability ratings (generally reliable, unreliable, deprecated, blacklisted)",
+    "Content type classification (news, blogs, government, social media, AI-generated)",
+    "Interactive dashboard for citation statistics",
+    "Multi-language support (17 languages)",
+    "Custom domain and URL pattern configuration",
+    "MediaWiki integration"
+  ],
+  "publicApiSurface": [
+    "CiteUnseen.init()",
+    "CiteUnseen.parseCoinsString(query)",
+    "CiteUnseen.parseDateToken(token)",
+    "CiteUnseen.categorizedRules",
+    "CiteUnseen.ruleConfig",
+    "CiteUnseenData.citeUnseenSources",
+    "CiteUnseenData.citeUnseenChecklists",
+    "window.cite_unseen_categories",
+    "window.cite_unseen_domain_ignore",
+    "window.cite_unseen_additional_domains",
+    "window.cite_unseen_additional_strings",
+    "window.cite_unseen_dashboard",
+    "window.cite_unseen_show_suggestions"
+  ]
+}
