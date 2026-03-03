@@ -1,0 +1,285 @@
+---
+title: Core Functions
+description: Core utility functions in the CiteUnseen object for parsing citations, matching rules, and processing data.
+---
+
+## Overview
+
+Cite Unseen provides a set of core utility functions through the `CiteUnseen` object for parsing citation metadata, matching sources against rules, and processing dates and URLs.
+
+## Citation Parsing
+
+### parseCoinsString()
+
+Parses a COinS (ContextObjects in Spans) string into a JavaScript object.
+
+<ParamField path="query" type="string" required>
+  COinS query string to parse
+</ParamField>
+
+<ResponseField name="result" type="Object">
+  Parsed object with key-value pairs from the COinS string. If a key appears multiple times, the value becomes an array.
+</ResponseField>
+
+```javascript
+const coins = CiteUnseen.parseCoinsString("rft.title=Example&rft.au=Smith");
+// Returns: { "rft.title": "Example", "rft.au": "Smith" }
+```
+
+### parseDateToken()
+
+Parses a date token into a start/end date range for comparison operations.
+
+<ParamField path="token" type="string" required>
+  Date token in format "yyyy", "yyyy-MM", or "yyyy-MM-dd"
+</ParamField>
+
+<ResponseField name="result" type="Object">
+  Object with `start` and `end` Date objects representing the range
+</ResponseField>
+
+```javascript
+const range = CiteUnseen.parseDateToken("2020");
+// Returns: { 
+//   start: Date(2020, 0, 1, 0, 0, 0, 0),
+//   end: Date(2020, 11, 31, 23, 59, 59, 999)
+// }
+
+const monthRange = CiteUnseen.parseDateToken("2020-06");
+// Returns range for entire month of June 2020
+```
+
+**Throws:** `Error` if the date token format is invalid
+
+### parseDateRule()
+
+Parses a date rule string into a predicate function for date matching.
+
+<ParamField path="ruleString" type="string" required>
+  Date rule using operators (`>=`, `<=`, `>`, `<`, `=`). Multiple conditions can be combined:
+  - Use `,` for AND logic (e.g., `">=2020,<=2022"`)
+  - Use `;` for OR logic (e.g., `"<=2015;>=2020"`)
+</ParamField>
+
+<ResponseField name="result" type="Function | null">
+  Predicate function that takes a Date and returns boolean, or null if invalid
+</ResponseField>
+
+```javascript
+const predicate = CiteUnseen.parseDateRule(">=2020-01-01,<=2022-12-31");
+if (predicate) {
+  const isInRange = predicate(new Date(2021, 5, 15)); // true
+}
+```
+
+## Rule Matching
+
+### match()
+
+Checks if a citation matches all conditions in a rule.
+
+<ParamField path="coins" type="Object" required>
+  COinS object containing citation metadata
+</ParamField>
+
+<ParamField path="rule" type="Object" required>
+  Rule object with fields: `author`, `pub`, `date`, `url`, `url_str`
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if citation matches all rule conditions, false otherwise
+</ResponseField>
+
+```javascript
+const coins = CiteUnseen.parseCoinsString(coinsString);
+const rule = { "url": "example.com", "date": ">=2020" };
+const matches = CiteUnseen.match(coins, rule);
+```
+
+### matchAuthor()
+
+Checks if the citation's author matches the rule's author pattern.
+
+<ParamField path="coins" type="Object" required>
+  COinS object with `rft.au`, `rft.aulast`, or `rft.aufirst` fields
+</ParamField>
+
+<ParamField path="rule" type="Object" required>
+  Rule object with `author` field (regex pattern)
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if any author matches the regex pattern (case-insensitive)
+</ResponseField>
+
+### matchPublisher()
+
+Checks if the citation's publisher matches the rule's publisher pattern.
+
+<ParamField path="coins" type="Object" required>
+  COinS object with `rft.pub` or `rft.jtitle` fields
+</ParamField>
+
+<ParamField path="rule" type="Object" required>
+  Rule object with `pub` field (regex pattern)
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if publisher matches the regex pattern (case-insensitive)
+</ResponseField>
+
+### matchDate()
+
+Checks if the citation's date matches the rule's date conditions.
+
+<ParamField path="coins" type="Object" required>
+  COinS object with `rft.date` field
+</ParamField>
+
+<ParamField path="rule" type="Object" required>
+  Rule object with `date` field (date rule string)
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if date matches the rule, false if no date or no match
+</ResponseField>
+
+### matchUrl()
+
+Checks if the citation's URL matches the rule's domain pattern.
+
+<ParamField path="coins" type="Object" required>
+  COinS object with `rft_id` field containing URLs
+</ParamField>
+
+<ParamField path="rule" type="Object" required>
+  Rule object with `url` field (domain string)
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if any URL matches the domain pattern with proper URL regex
+</ResponseField>
+
+### matchUrlString()
+
+Checks if the citation's URL contains a specific string.
+
+<ParamField path="coins" type="Object" required>
+  COinS object with `rft_id` field containing URLs
+</ParamField>
+
+<ParamField path="rule" type="Object" required>
+  Rule object with `url_str` field (substring to match)
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if any URL contains the substring
+</ResponseField>
+
+## URL and String Processing
+
+### escapeRegex()
+
+Escapes special regex characters in a string for safe use in regular expressions.
+
+<ParamField path="string" type="string" required>
+  String to escape
+</ParamField>
+
+<ResponseField name="result" type="string">
+  String with regex special characters escaped
+</ResponseField>
+
+```javascript
+const escaped = CiteUnseen.escapeRegex("example.com/path");
+// Returns: "example\\.com\\/path"
+```
+
+### urlRegex()
+
+Builds a regular expression for matching URLs with a specific domain.
+
+<ParamField path="string" type="string" required>
+  Domain string to match
+</ParamField>
+
+<ResponseField name="result" type="RegExp">
+  Regular expression that matches http:// or https:// URLs with the domain
+</ResponseField>
+
+```javascript
+const regex = CiteUnseen.urlRegex("example.com");
+// Returns: /https?:\/\/([^\/]*\.)?example\.com($|(?<=\.)|\/))/
+```
+
+## Finding Matches
+
+### findReliabilityMatch()
+
+Finds matching reliability categories for a citation, prioritizing the current language.
+
+<ParamField path="coins" type="Object" required>
+  COinS object containing citation metadata
+</ParamField>
+
+<ParamField path="filteredCategorizedRules" type="Object" required>
+  Filtered rules object organized by category
+</ParamField>
+
+<ResponseField name="result" type="Array">
+  Array of match objects with properties:
+  - `type`: Category type (blacklisted, deprecated, etc.)
+  - `name`: Checklist name (e.g., "enRSP", "zhRSP")
+  - `language`: Language code
+  - `spec`: Specificity score based on conditions matched
+</ResponseField>
+
+Returns one match for the current language if available, or all matches from other languages otherwise.
+
+### findTypeMatches()
+
+Finds all matching type categories for a citation.
+
+<ParamField path="coins" type="Object" required>
+  COinS object containing citation metadata
+</ParamField>
+
+<ParamField path="filteredCategorizedRules" type="Object" required>
+  Filtered rules object organized by category
+</ParamField>
+
+<ParamField path="typeCategories" type="Array" required>
+  Array of type category names to check (e.g., ["news", "blogs", "social"])
+</ParamField>
+
+<ResponseField name="result" type="Array">
+  Array of matching category names that are enabled
+</ResponseField>
+
+Checks custom domains/strings first, then built-in categorizations.
+
+## Internationalization
+
+### parseI18nPlural()
+
+Parses strings containing the plural marker "(s)" based on a count value.
+
+<ParamField path="string" type="string" required>
+  String containing "(s)" marker
+</ParamField>
+
+<ParamField path="value" type="number" required>
+  Count value to determine singular/plural
+</ParamField>
+
+<ResponseField name="result" type="string">
+  String with "(s)" replaced by "s" if value ≠ 1, or empty string if value = 1
+</ResponseField>
+
+```javascript
+const text = CiteUnseen.parseI18nPlural("citation(s)", 1);
+// Returns: "citation"
+
+const plural = CiteUnseen.parseI18nPlural("citation(s)", 5);
+// Returns: "citations"
+```

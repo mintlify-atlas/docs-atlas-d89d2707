@@ -1,0 +1,269 @@
+---
+title: Using the dashboard
+description: Learn how to use the Cite Unseen dashboard to filter and analyze citations in Wikipedia articles
+---
+
+The Cite Unseen dashboard appears above reference lists and provides an interactive overview of citation categories. You can use it to filter citations by category and quickly assess the overall quality of sources in an article.
+
+## Enabling the dashboard
+
+The dashboard is controlled by the `cite_unseen_dashboard` global variable. To enable it, add this to your JavaScript configuration:
+
+```javascript
+window.cite_unseen_dashboard = true;
+```
+
+<Info>The dashboard can also be enabled through the Cite Unseen settings dialog. See [Customization](/guide/customization) for details.</Info>
+
+## Dashboard location
+
+The dashboard automatically appears before each reference list (reflist) in an article. If you have multiple reference lists on a page (for example, separate lists for different sections), each list gets its own dashboard.
+
+<Note>If no categorizations are found in a reference list, the dashboard won't appear for that list.</Note>
+
+## Dashboard components
+
+### Header section
+
+The dashboard header shows:
+
+- **Total citations count:** The total number of citations in the reference list
+- **Filtered count:** When filters are active, shows how many citations match the current filters (e.g., "Showing 15 of 42 citations")
+- **Clear All button:** Appears when multiple filters are active, allowing you to reset all filters at once
+
+### Category buttons
+
+Each category present in the reference list appears as a clickable button showing:
+
+- **Category icon:** The same icon used on citations
+- **Count:** Number of citations in that category
+- **Category label:** Descriptive text (e.g., "3 news", "5 generally reliable")
+
+<Tip>Hover over any category button to see a tooltip explaining what you can do with it.</Tip>
+
+## Filtering citations
+
+The primary function of the dashboard is to filter citations by category, making it easy to focus on specific types of sources.
+
+### Single category filter
+
+<Steps>
+  <Step title="Click a category button">
+    Click any category button in the dashboard. The button will highlight to show it's active.
+  </Step>
+  
+  <Step title="View filtered results">
+    The reference list below will update to show only citations in that category. Other citations will be hidden.
+  </Step>
+  
+  <Step title="Clear the filter">
+    Click the same button again to deselect it and show all citations.
+  </Step>
+</Steps>
+
+<Note>Citations are hidden by adding the class `cite-unseen-filtered-out` and setting `aria-hidden="true"` for accessibility.</Note>
+
+### Multiple category filters
+
+You can select multiple categories to show citations that match **all** selected categories (AND logic, not OR).
+
+**Example:**
+1. Click "news" - shows all news citations
+2. Click "generally reliable" - shows only citations that are BOTH news AND generally reliable
+3. Click "blogs" - shows citations that are news AND generally reliable AND blogs
+
+<Info>When multiple filters are active, the "Clear All" button appears in the dashboard header for quick reset.</Info>
+
+### Keyboard navigation
+
+Category buttons support keyboard interaction:
+
+- **Tab:** Navigate between category buttons
+- **Enter or Space:** Toggle the category filter
+- **Escape:** Clear all active filters (when any filter is active)
+
+All buttons have proper ARIA attributes for screen readers:
+- `role="button"`
+- `tabindex="0"`
+- `aria-pressed` ("true" when active, "false" when inactive)
+
+## Understanding filter behavior
+
+### AND logic for multiple filters
+
+When you select multiple categories, Cite Unseen uses AND logic. This means a citation must belong to ALL selected categories to remain visible.
+
+<Accordion title="Example: Finding reliable news sources">
+If you want to see only news sources that are generally reliable:
+
+1. Click the "news" category button
+2. Click the "generally reliable" category button
+3. Only citations that are tagged as BOTH news AND generally reliable will be visible
+
+Citations that are news but not generally reliable (or vice versa) will be hidden.
+</Accordion>
+
+### Citations with multiple categories
+
+A single citation can belong to multiple categories. For example, a citation might be categorized as:
+- news
+- opinions  
+- generally reliable
+
+This citation would be visible when filtering by any of these individual categories, or any combination of them.
+
+### Filter state indicators
+
+When filters are active, you'll see visual indicators:
+
+- **Selected category buttons:** Highlighted with the class `cite-unseen-filter-selected`
+- **Reference list:** Has class `cite-unseen-filtering-active` and attribute `data-cite-unseen-filter` listing active categories
+- **Filtered citations:** Have class `cite-unseen-filtered-out`
+
+## Common use cases
+
+<Tabs>
+  <Tab title="Checking reliability">
+  To assess the overall reliability of sources in an article:
+
+  1. Look at the counts for reliability categories:
+     - Green (generally reliable)
+     - Yellow (marginally reliable, no consensus)
+     - Red (generally unreliable, deprecated, blacklisted)
+
+  2. Click unreliable categories to review which sources are problematic
+
+  3. Consider whether the unreliable sources are supporting important claims
+
+  <Tip>A high count of "unknown" sources might indicate the article uses obscure sources that need evaluation.</Tip>
+  </Tab>
+
+  <Tab title="Finding specific source types">
+  To find specific types of sources:
+
+  1. Click the category for the source type you're interested in (e.g., "blogs", "social media", "press releases")
+
+  2. Review each citation to see if it's appropriate for its use in the article
+
+  3. Click "Clear All" or deselect the filter when done
+
+  <Warning>Some source types like press releases and social media are rarely appropriate for Wikipedia citations.</Warning>
+  </Tab>
+
+  <Tab title="Improving an article">
+  To identify sources that should be replaced:
+
+  1. Filter by problematic categories:
+     - "deprecated"
+     - "generally unreliable"
+     - "blogs"
+     - "social media"
+
+  2. For each visible citation, note what claim it supports
+
+  3. Find better sources to replace them
+
+  4. Use the filtered count to track your progress
+  </Tab>
+
+  <Tab title="Cross-referencing categories">
+  To find sources with specific combinations:
+
+  **Example 1: Reliable books**
+  - Select "books"
+  - Select "generally reliable"
+  - See which book citations have been evaluated as reliable
+
+  **Example 2: Unreliable news**
+  - Select "news"
+  - Select "generally unreliable"
+  - Identify news outlets that shouldn't be used
+
+  **Example 3: Opinion pieces from reliable sources**
+  - Select "opinions"
+  - Select "generally reliable"
+  - Find opinion pieces that need to be attributed to authors
+  </Tab>
+</Tabs>
+
+## Dashboard for multiple reference lists
+
+Some Wikipedia articles have multiple reference lists, either:
+- Separate lists for different sections
+- Split lists (e.g., "General references" and "Citations")
+- Multiple columns of references
+
+Each reference list gets its own independent dashboard with:
+- Separate category counts
+- Independent filter state
+- Individual "Clear All" buttons
+
+<Info>Filtering in one dashboard does not affect other dashboards on the same page.</Info>
+
+## Performance considerations
+
+The dashboard is designed to work efficiently even with articles that have many citations:
+
+- **Category counts** are calculated once when the dashboard is created
+- **Filtering** uses cached references and efficient DOM manipulation
+- **Container detection** finds the appropriate list item (`<li>`) for each citation
+
+<Note>The total citation count for each reflist is cached in `reflistData.totalCitations` to avoid repeated DOM queries.</Note>
+
+## Accessibility features
+
+The dashboard is built with accessibility in mind:
+
+- All interactive elements are keyboard accessible
+- Proper ARIA roles and attributes
+- Screen reader announcements for filter state
+- Focus indicators on category buttons
+- Hidden citations marked with `aria-hidden="true"`
+
+## Troubleshooting
+
+<Accordion title="Dashboard doesn't appear">
+**Possible causes:**
+
+1. The dashboard is disabled in settings (`cite_unseen_dashboard` is not set to `true`)
+2. The reference list has no categorizations
+3. JavaScript errors are preventing initialization
+
+**Solution:** Check your browser console for errors and verify settings.
+</Accordion>
+
+<Accordion title="Some citations don't disappear when filtered">
+**Possible cause:** The citation doesn't belong to the category you selected.
+
+**Note:** Citations can have multiple categories. If you're filtering for "news" but a citation remains visible when you expect it to be hidden, it might be categorized differently than you think.
+
+**Solution:** Click on the citation's icons to see which categories it belongs to.
+</Accordion>
+
+<Accordion title="Clear All button doesn't appear">
+The "Clear All" button only appears when **two or more** filters are active.
+
+**Solution:** This is intentional behavior. With only one filter active, simply click that category button again to clear it.
+</Accordion>
+
+<Accordion title="Category counts seem wrong">
+**Possible cause:** A citation can belong to multiple categories, so category counts may overlap.
+
+**Example:** A citation categorized as both "news" and "generally unreliable" will be counted in both categories. This is correct behavior—the counts show how many citations have that category, not exclusive membership.
+</Accordion>
+
+## Dashboard customization
+
+The dashboard appearance can be customized through CSS by targeting these classes:
+
+- `.cite-unseen-dashboard` - Main dashboard container
+- `.cite-unseen-dashboard-header` - Header section
+- `.cite-unseen-dashboard-total` - Total/filtered count display
+- `.cite-unseen-dashboard-cats` - Category buttons container
+- `.cite-unseen-category-item` - Individual category buttons
+- `.cite-unseen-category-icon` - Category icons
+- `.cite-unseen-category-text` - Category label text
+- `.cite-unseen-filter-selected` - Active filter buttons
+- `.cite-unseen-clear-all-header` - Clear All button
+
+<Tip>If you're creating a user style or custom skin, use these classes to match the dashboard to your preferred Wikipedia theme.</Tip>

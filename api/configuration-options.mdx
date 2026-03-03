@@ -1,0 +1,219 @@
+---
+title: Configuration Options
+description: Global configuration variables for customizing Cite Unseen behavior and appearance.
+---
+
+## Overview
+
+Cite Unseen can be customized through global configuration variables defined in `window`. These variables should be set before the script loads, typically in your `common.js` or user JavaScript file.
+
+## Global Variables
+
+All configuration is done through `window.cite_unseen_*` global variables. These are mapped internally through `ruleConfig.globalMapping`.
+
+### Available Configuration Variables
+
+From `ruleConfig.globalVars`:
+
+```javascript
+[
+  'cite_unseen_categories',
+  'cite_unseen_domain_ignore',
+  'cite_unseen_additional_domains',
+  'cite_unseen_additional_strings',
+  'cite_unseen_dashboard',
+  'cite_unseen_show_suggestions',
+  'cite_unseen_hide_social_media_reliability_ratings'
+]
+```
+
+## Category Control
+
+### cite_unseen_categories
+
+<ParamField path="window.cite_unseen_categories" type="Object">
+  Object mapping category names to boolean values to enable/disable specific categories.
+</ParamField>
+
+**Available Categories:**
+- **Reliability**: `blacklisted`, `deprecated`, `generallyUnreliable`, `marginallyReliable`, `generallyReliable`, `multi`
+- **Types**: `advocacy`, `aiGenerated`, `aiReferred`, `blogs`, `books`, `community`, `editable`, `government`, `news`, `opinions`, `predatory`, `press`, `satire`, `social`, `sponsored`, `tabloids`, `tvPrograms`
+- **Other**: `unknown`
+
+**Example:**
+```javascript
+window.cite_unseen_categories = {
+  "blacklisted": true,
+  "deprecated": true,
+  "generallyUnreliable": true,
+  "news": true,
+  "blogs": false,  // Disable blog indicators
+  "social": false, // Disable social media indicators
+  "unknown": false // Don't show unknown sources
+};
+```
+
+**Grouped Categories:**
+
+Reliability categories can control multiple checklists at once:
+- `blacklisted`: Controls enRspBlacklisted, zhRspBlacklisted, enKoreasBlacklisted, enVsafesBlacklisted, viDsndtcBlacklisted
+- `deprecated`: Controls enRspDeprecated, zhRspDeprecated, enChartsDeprecated
+- `generallyUnreliable`: Controls all "generally unreliable" checklists across languages
+- `marginallyReliable`: Controls all "marginally reliable" checklists
+- `generallyReliable`: Controls all "generally reliable" checklists
+- `multi`: Controls all "no consensus" checklists
+
+## Domain Configuration
+
+### cite_unseen_domain_ignore
+
+<ParamField path="window.cite_unseen_domain_ignore" type="Object">
+  Object mapping category names to arrays of domains to ignore for that category.
+</ParamField>
+
+Use this to prevent specific domains from matching certain categories, even if they're in the built-in rules.
+
+**Example:**
+```javascript
+window.cite_unseen_domain_ignore = {
+  "news": ["example-news.com", "another-news.org"],
+  "blogs": ["notablog.com"]
+};
+```
+
+### cite_unseen_additional_domains
+
+<ParamField path="window.cite_unseen_additional_domains" type="Object">
+  Object mapping category names to arrays of additional domains to match for that category.
+</ParamField>
+
+Extend built-in categorization with your own domain patterns.
+
+**Example:**
+```javascript
+window.cite_unseen_additional_domains = {
+  "news": ["localnews.example", "regional-daily.com"],
+  "blogs": ["personalblog.net"],
+  "social": ["newplatform.social"]
+};
+```
+
+### cite_unseen_additional_strings
+
+<ParamField path="window.cite_unseen_additional_strings" type="Object">
+  Object mapping category names to arrays of URL substrings to match for that category.
+</ParamField>
+
+Match URLs containing specific strings rather than exact domains.
+
+**Example:**
+```javascript
+window.cite_unseen_additional_strings = {
+  "aiReferred": ["?ai=", "&utm_ai="],  // Track AI-referred links
+  "social": ["/status/", "/posts/"]   // Match social media post patterns
+};
+```
+
+## UI Features
+
+### cite_unseen_dashboard
+
+<ParamField path="window.cite_unseen_dashboard" type="boolean" default="true">
+  Enable or disable the citation dashboard that shows category counts and filtering.
+</ParamField>
+
+**Example:**
+```javascript
+window.cite_unseen_dashboard = false; // Disable dashboard
+```
+
+### cite_unseen_show_suggestions
+
+<ParamField path="window.cite_unseen_show_suggestions" type="boolean" default="true">
+  Enable or disable suggestion features.
+</ParamField>
+
+**Example:**
+```javascript
+window.cite_unseen_show_suggestions = false; // Disable suggestions
+```
+
+### cite_unseen_hide_social_media_reliability_ratings
+
+<ParamField path="window.cite_unseen_hide_social_media_reliability_ratings" type="boolean" default="false">
+  Hide generic (spec=0) reliability ratings for social media sources. Specific ratings with conditions are still shown.
+</ParamField>
+
+**Example:**
+```javascript
+window.cite_unseen_hide_social_media_reliability_ratings = true;
+```
+
+### cite_unseen_show_other_language_reliability_ratings
+
+<ParamField path="window.cite_unseen_show_other_language_reliability_ratings" type="boolean" default="false">
+  Show reliability ratings from all language wikis, not just the current language. When false, only shows current language ratings, falling back to other languages if none exist.
+</ParamField>
+
+**Example:**
+```javascript
+window.cite_unseen_show_other_language_reliability_ratings = true;
+```
+
+## Configuration Structure
+
+### ruleConfig
+
+Internal configuration object defining how global variables are processed:
+
+<ResponseField name="globalVars" type="Array">
+  List of all supported global variable names
+</ResponseField>
+
+<ResponseField name="mergeableProps" type="Array">
+  Properties that merge between meta and local rules: `['categories', 'domainIgnore', 'additionalDomains', 'additionalStrings']`
+</ResponseField>
+
+<ResponseField name="booleanProps" type="Array">
+  Boolean properties where local takes precedence: `['dashboard', 'showSuggestions', 'hideSocialMediaReliabilityRatings', 'showOtherLanguageReliabilityRatings']`
+</ResponseField>
+
+<ResponseField name="globalMapping" type="Object">
+  Maps internal property names to global variable names:
+  ```javascript
+  {
+    categories: 'cite_unseen_categories',
+    domainIgnore: 'cite_unseen_domain_ignore',
+    additionalDomains: 'cite_unseen_additional_domains',
+    additionalStrings: 'cite_unseen_additional_strings',
+    dashboard: 'cite_unseen_dashboard',
+    showSuggestions: 'cite_unseen_show_suggestions',
+    hideSocialMediaReliabilityRatings: 'cite_unseen_hide_social_media_reliability_ratings',
+    showOtherLanguageReliabilityRatings: 'cite_unseen_show_other_language_reliability_ratings'
+  }
+  ```
+</ResponseField>
+
+## Custom Rules Files
+
+Users can also define custom rules in their user JavaScript subpage:
+
+- **Meta Wiki**: `User:<Username>/CiteUnseen-Rules.js` on meta.wikimedia.org
+- **Local Wiki**: `User:<Username>/CiteUnseen-Rules.js` on your local wiki
+
+Local rules are merged with meta rules, with local rules taking precedence. For mergeable properties (domains, strings), arrays are combined. For boolean properties, local values override meta values.
+
+**Example Custom Rules File:**
+```javascript
+// User:Example/CiteUnseen-Rules.js
+window.cite_unseen_categories = {
+  "blogs": false,
+  "social": false
+};
+
+window.cite_unseen_additional_domains = {
+  "news": ["mytrusted.news"]
+};
+
+window.cite_unseen_dashboard = true;
+```

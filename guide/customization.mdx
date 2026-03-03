@@ -1,0 +1,526 @@
+---
+title: Customization
+description: Configure Cite Unseen behavior through global variables and settings
+---
+
+Cite Unseen can be customized through global JavaScript variables. You can configure these in your personal JavaScript file (e.g., `common.js` or `skin.js`) or through the settings dialog.
+
+## Configuration variables
+
+All Cite Unseen configuration variables are prefixed with `cite_unseen_` and must be set on the `window` object before Cite Unseen initializes.
+
+### Display options
+
+<Accordion title="cite_unseen_dashboard">
+**Type:** Boolean
+
+**Default:** `false` (dashboard hidden)
+
+**Description:** Controls whether the dashboard appears above reference lists.
+
+**Example:**
+```javascript
+window.cite_unseen_dashboard = true;
+```
+
+When enabled, an interactive dashboard appears above each reference list, showing category counts and providing filtering functionality.
+
+<Info>See [Using the dashboard](/guide/using-dashboard) for details about dashboard features.</Info>
+</Accordion>
+
+<Accordion title="cite_unseen_show_suggestions">
+**Type:** Boolean
+
+**Default:** `false` (suggestions disabled)
+
+**Description:** Shows a "Suggest Categories" button that allows you to propose categorization for unknown citations.
+
+**Example:**
+```javascript
+window.cite_unseen_show_suggestions = true;
+```
+
+When enabled, you can click on unknown citations to suggest categories for them, which opens a pre-filled edit form on Meta-Wiki.
+
+<Tip>Enable this if you want to contribute to improving Cite Unseen's source database.</Tip>
+</Accordion>
+
+<Accordion title="cite_unseen_hide_social_media_reliability_ratings">
+**Type:** Boolean
+
+**Default:** `false` (show all ratings)
+
+**Description:** Hides reliability ratings for social media links from unrated publishers.
+
+**Example:**
+```javascript
+window.cite_unseen_hide_social_media_reliability_ratings = true;
+```
+
+When enabled, social media links that match a reliability category only through a generic rule (with no specific conditions like author, publisher, or date) will not show the reliability icon. The social media icon will still appear.
+
+**Use case:** If you find reliability ratings on social media links too aggressive, enable this to only show ratings for specifically evaluated social media accounts.
+
+<Note>This only affects reliability icons with a specificity score of 0.0 (no additional matching conditions beyond the domain).</Note>
+</Accordion>
+
+<Accordion title="cite_unseen_show_other_language_reliability_ratings">
+**Type:** Boolean
+
+**Default:** `false` (prefer local ratings)
+
+**Description:** Shows reliability ratings from other language Wikipedias even when local ratings are available.
+
+**Example:**
+```javascript
+window.cite_unseen_show_other_language_reliability_ratings = true;
+```
+
+**Default behavior:** Cite Unseen prefers reliability assessments from your local Wikipedia. If none exist, it shows assessments from other language Wikipedias.
+
+**When enabled:** Shows reliability assessments from all language Wikipedias, even if your local Wikipedia has already assessed the source.
+
+**Use case:** Useful if you want to see how different language communities assess the same sources.
+</Accordion>
+
+### Category toggles
+
+<Accordion title="cite_unseen_categories">
+**Type:** Object (key-value pairs)
+
+**Default:** All categories enabled
+
+**Description:** Controls which categories are enabled or disabled. Disabled categories won't show icons or appear in the dashboard.
+
+**Example:**
+```javascript
+window.cite_unseen_categories = {
+    "social": false,        // Disable social media category
+    "blogs": false,         // Disable blog category
+    "news": true,           // Keep news enabled
+    "generallyReliable": true  // Keep reliability categories
+};
+```
+
+**Available categories:**
+
+**Reliability categories:**
+- `blacklisted`
+- `deprecated`
+- `generallyUnreliable`
+- `marginallyReliable`
+- `multi` (no consensus)
+- `generallyReliable`
+
+**Type categories:**
+- `advocacy`
+- `aiGenerated`
+- `aiReferred`
+- `blogs`
+- `books`
+- `community`
+- `editable`
+- `government`
+- `news`
+- `opinions`
+- `predatory`
+- `press`
+- `satire`
+- `social`
+- `sponsored`
+- `tabloids`
+- `tvPrograms`
+- `unknown`
+
+<Warning>Disabling reliability categories (especially problematic ones like `deprecated` or `generallyUnreliable`) is not recommended as it hides important information about source quality.</Warning>
+</Accordion>
+
+### Custom domain rules
+
+<Accordion title="cite_unseen_additional_domains">
+**Type:** Object with arrays of domain strings
+
+**Default:** None
+
+**Description:** Adds custom domains to specific categories. This allows you to extend Cite Unseen's categorization with your own rules.
+
+**Example:**
+```javascript
+window.cite_unseen_additional_domains = {
+    "news": [
+        "example-news.com",
+        "local-newspaper.org"
+    ],
+    "blogs": [
+        "personalblog.com"
+    ]
+};
+```
+
+**Domain format:** Use just the domain name without protocol or path:
+- ✅ Correct: `"example.com"`
+- ❌ Incorrect: `"https://example.com"` or `"example.com/news"`
+
+**Matching behavior:** Cite Unseen will match the domain and all its subdomains:
+- `"example.com"` matches:
+  - `http://example.com`
+  - `https://example.com`
+  - `https://www.example.com`
+  - `https://news.example.com`
+
+<Info>Custom domains are checked before built-in categorizations, so they take precedence.</Info>
+</Accordion>
+
+<Accordion title="cite_unseen_additional_strings">
+**Type:** Object with arrays of URL pattern strings
+
+**Default:** None
+
+**Description:** Adds custom URL patterns to specific categories. This is more flexible than domain matching and can match specific URL structures.
+
+**Example:**
+```javascript
+window.cite_unseen_additional_strings = {
+    "blogs": [
+        "/blog/",
+        "/personal/"
+    ],
+    "opinions": [
+        "/opinion/",
+        "/editorial/",
+        "/commentary/"
+    ]
+};
+```
+
+**Pattern matching:** The string is checked against the full URL using simple substring matching:
+- `"/blog/"` matches any URL containing `/blog/` anywhere in the path
+- `"?page=news"` matches URLs with this query parameter
+- `"utm_source=chatgpt"` matches URLs with this tracking parameter
+
+**Use cases:**
+- Match specific URL structures (e.g., `/blog/` paths)
+- Match query parameters (e.g., `?category=opinion`)
+- Match URL fragments that indicate content type
+
+<Tip>URL strings are more flexible than domains but be careful not to make patterns too generic (e.g., `/news/` might match unintended URLs).</Tip>
+</Accordion>
+
+<Accordion title="cite_unseen_domain_ignore">
+**Type:** Object with arrays of domain strings
+
+**Default:** None
+
+**Description:** Excludes specific domains from categories. This is useful for removing false positives from Cite Unseen's built-in categorizations.
+
+**Example:**
+```javascript
+window.cite_unseen_domain_ignore = {
+    "blogs": [
+        "professional-news-site.com"  // Remove from blogs category
+    ],
+    "tabloids": [
+        "reformed-newspaper.com"  // No longer a tabloid
+    ]
+};
+```
+
+**Domain format:** Same as `cite_unseen_additional_domains` - just the domain name without protocol.
+
+**Use case:** If Cite Unseen incorrectly categorizes a domain, you can exclude it from that category while still allowing other categories to apply.
+
+**Note:** Ignored domains are filtered from built-in rules during initialization. Custom domains added via `cite_unseen_additional_domains` are not affected by ignore rules.
+</Accordion>
+
+## Priority and merging
+
+Cite Unseen loads configuration from multiple sources with this priority order (highest to lowest):
+
+1. **Local wiki common.js** (highest priority)
+2. **Meta-Wiki global configuration**
+3. **Built-in defaults** (lowest priority)
+
+### Mergeable properties
+
+These properties merge values from all sources:
+- `cite_unseen_categories`
+- `cite_unseen_domain_ignore`
+- `cite_unseen_additional_domains`
+- `cite_unseen_additional_strings`
+
+**Example:**
+```javascript
+// Meta-Wiki global config
+window.cite_unseen_categories = {
+    "social": false
+};
+
+// Your local common.js
+window.cite_unseen_categories = {
+    "blogs": false
+};
+
+// Result: Both social AND blogs are disabled
+```
+
+### Boolean properties
+
+These properties use the highest priority value only:
+- `cite_unseen_dashboard`
+- `cite_unseen_show_suggestions`
+- `cite_unseen_hide_social_media_reliability_ratings`
+- `cite_unseen_show_other_language_reliability_ratings`
+
+**Example:**
+```javascript
+// Meta-Wiki global config
+window.cite_unseen_dashboard = true;
+
+// Your local common.js  
+window.cite_unseen_dashboard = false;
+
+// Result: Dashboard is disabled (local setting wins)
+```
+
+<Info>The internal property names differ slightly from global variable names. The script automatically maps between them using the `globalMapping` configuration.</Info>
+
+## Configuration through settings dialog
+
+Cite Unseen includes a settings dialog that provides a user-friendly interface for configuration. Access it through the "Cite Unseen Settings" button that appears near reference lists.
+
+<Note>Settings saved through the dialog are stored locally and override both built-in defaults and Meta-Wiki configuration.</Note>
+
+### Settings tabs
+
+The settings dialog has multiple tabs:
+
+<Tabs>
+  <Tab title="General">
+  Basic display options:
+  - Show dashboard above reflists
+  - Show suggestions button
+  - Hide social media reliability ratings
+  - Show other language reliability ratings
+
+  <Info>These correspond to the boolean configuration variables described above.</Info>
+  </Tab>
+
+  <Tab title="Categories">
+  Enable or disable specific categories:
+  - Checkboxes for all available categories
+  - Reliability categories (blacklisted, deprecated, etc.)
+  - Type categories (news, blogs, social, etc.)
+
+  Guidance text explains: "Enable or disable specific categories of citations. Disabled categories will not show icons or appear in the dashboard."
+  </Tab>
+
+  <Tab title="Ignore Domains">
+  Add domains to exclude from categories:
+  - Text area for each category
+  - One domain per line
+  - Format: `example.com`
+
+  Guidance text: "Enter domains to exclude from each category. Sources from these domains will not be marked with the corresponding category icon."
+
+  <Tip>The settings dialog will automatically correct domain formats (e.g., removing `https://` if you include it).</Tip>
+  </Tab>
+
+  <Tab title="Additional Domains">
+  Add custom domains to categories:
+  - Text area for each category  
+  - One domain per line
+  - Format: `example.com`
+
+  Guidance text: "Add custom domains to include in each category. Sources from these domains will be marked with the corresponding category icon."
+  </Tab>
+
+  <Tab title="Additional URL Strings">
+  Add custom URL patterns to categories:
+  - Text area for each category
+  - One pattern per line
+  - Format: any substring (e.g., `/blog/`, `?page=news`)
+
+  Guidance text: "Add custom URL patterns to include in each category. Sources containing these URL patterns will be marked with the corresponding category icon."
+
+  <Warning>Be specific with URL patterns to avoid false matches.</Warning>
+  </Tab>
+</Tabs>
+
+### Saving settings
+
+When you save settings:
+
+1. Settings are validated for format and completeness
+2. Settings are written to your browser's local storage
+3. You're prompted to reload the page to apply changes
+4. On reload, Cite Unseen reads the settings and applies them
+
+<Note>Settings are stored per-wiki in local storage. If you use multiple Wikipedia languages, you'll need to configure each separately.</Note>
+
+## Example configurations
+
+<Accordion title="Minimal setup (reliability focus)">
+Focus only on reliability indicators, hiding most type categories:
+
+```javascript
+window.cite_unseen_dashboard = true;
+window.cite_unseen_categories = {
+    // Disable type categories
+    "blogs": false,
+    "social": false,
+    "news": false,
+    "books": false,
+    "opinions": false,
+    "press": false,
+    "tvPrograms": false,
+    
+    // Keep concern categories
+    "advocacy": true,
+    "aiGenerated": true,
+    "editable": true,
+    "predatory": true,
+    "tabloids": true,
+    
+    // Keep all reliability categories
+    "blacklisted": true,
+    "deprecated": true,
+    "generallyUnreliable": true,
+    "marginallyReliable": true,
+    "multi": true,
+    "generallyReliable": true
+};
+```
+</Accordion>
+
+<Accordion title="Source contributor setup">
+Configuration for users who want to help improve Cite Unseen:
+
+```javascript
+window.cite_unseen_dashboard = true;
+window.cite_unseen_show_suggestions = true;
+window.cite_unseen_show_other_language_reliability_ratings = true;
+
+// Keep all categories enabled to see what needs categorization
+```
+</Accordion>
+
+<Accordion title="Custom local news outlets">
+Add local news sources not in Cite Unseen's database:
+
+```javascript
+window.cite_unseen_additional_domains = {
+    "news": [
+        "local-daily.com",
+        "citychronicle.org",
+        "regional-times.net"
+    ],
+    "generallyReliable": [
+        "local-daily.com",  // Also mark as reliable
+        "citychronicle.org"
+    ]
+};
+```
+
+<Info>You can add the same domain to multiple categories. A citation from `local-daily.com` would show both news and generally reliable icons.</Info>
+</Accordion>
+
+<Accordion title="Filter out opinion pieces from blogs">
+Identify opinion content on blog platforms:
+
+```javascript
+window.cite_unseen_additional_strings = {
+    "opinions": [
+        "medium.com/@",  // Medium user posts
+        "substack.com",  // Substack newsletters  
+        "/opinion/",
+        "/editorial/",
+        "/commentary/"
+    ]
+};
+```
+</Accordion>
+
+<Accordion title="Reduce noise for social media">
+Hide generic social media reliability ratings:
+
+```javascript
+window.cite_unseen_hide_social_media_reliability_ratings = true;
+
+// Social media will still be marked as social media,
+// but won't show reliability icons unless the specific
+// account/publisher has been evaluated
+```
+</Accordion>
+
+## Advanced: Programmatic configuration
+
+For advanced users, you can set configuration dynamically:
+
+```javascript
+// Wait for Cite Unseen to load
+mw.loader.using('ext.gadget.cite-unseen', function() {
+    // Modify configuration before initialization
+    window.cite_unseen_dashboard = true;
+    
+    // Add domains based on current wiki
+    var currentLang = mw.config.get('wgContentLanguage');
+    if (currentLang === 'en') {
+        window.cite_unseen_additional_domains = {
+            "news": ["example-en.com"]
+        };
+    } else if (currentLang === 'es') {
+        window.cite_unseen_additional_domains = {
+            "news": ["ejemplo-es.com"]
+        };
+    }
+});
+```
+
+<Warning>Ensure your configuration is set before Cite Unseen initializes. The safest approach is to set variables at the top of your common.js or skin.js file.</Warning>
+
+## Troubleshooting configuration
+
+<Accordion title="Settings don't apply after saving">
+**Solution:** Reload the page. Settings only apply on page load, not immediately after saving.
+</Accordion>
+
+<Accordion title="Custom domains not matching">
+**Common issues:**
+
+1. **Protocol included:** Remove `http://` or `https://`
+   - ❌ `"https://example.com"`
+   - ✅ `"example.com"`
+
+2. **Path included:** Remove everything after the domain
+   - ❌ `"example.com/news"`
+   - ✅ `"example.com"`
+   - ℹ️ Use `cite_unseen_additional_strings` for path matching instead
+
+3. **Subdomain specificity:** Be aware of subdomain matching
+   - `"example.com"` matches `www.example.com` and `news.example.com`
+   - To match only the root domain, you may need URL string matching
+</Accordion>
+
+<Accordion title="Categories still appear after disabling">
+**Possible causes:**
+
+1. **Cache:** Clear your browser cache and reload
+2. **Conflicting settings:** Check if Meta-Wiki global config is re-enabling the category
+3. **Multiple sources:** A citation might match multiple category rules
+
+**Debug:** Open browser console and type:
+```javascript
+console.log(CiteUnseen.citeUnseenCategories);
+```
+This shows which categories are actually enabled.
+</Accordion>
+
+<Accordion title="Settings dialog shows old values">
+**Cause:** The dialog reads from local storage, which might be out of sync with your JavaScript configuration.
+
+**Solution:** Clear local storage for Cite Unseen:
+```javascript
+localStorage.removeItem('CiteUnseenSettings');
+```
+Then reload the page.
+</Accordion>

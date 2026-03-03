@@ -1,0 +1,215 @@
+---
+title: Code Structure
+description: Detailed guide to the file structure and organization of the Cite Unseen codebase
+---
+
+This page documents the file structure and organization of the Cite Unseen project.
+
+## Repository Layout
+
+```
+cite-unseen/
+├── main.js              # Entry point and core logic
+├── sources.js           # Source categorization data
+├── i18n.js              # Internationalization strings
+├── styles.css           # Visual styling
+├── build.js             # Build script for bundling
+├── i18n/                # Translation JSON files
+│   ├── en.json
+│   ├── zh-hans.json
+│   ├── zh-hant.json
+│   └── ...
+├── .gitlab-ci.yml       # CI/CD configuration
+├── LICENSE              # CC BY-SA 4.0 license
+└── README.md            # Project overview
+```
+
+## Core Files
+
+### main.js
+
+The entry point for Cite Unseen. This file contains:
+
+- **Properties and State**: Global state management for the application
+- **Configuration**: User preferences and global variables
+- **Core Logic**: Citation processing, DOM manipulation, and UI rendering
+- **Dependency Loading**: Dynamic loading of other components in unbundled mode
+
+Key objects defined in `main.js:3-22`:
+
+```javascript
+const CiteUnseen = {
+    categorizedRules: null,
+    citeUnseenCategories: null,
+    citeUnseenCategoryTypes: null,
+    citeUnseenChecklists: null,
+    citeUnseenCategoryData: null,
+    citeUnseenDomainIgnore: {},
+    refs: [],
+    refLinks: [],
+    refCategories: {},
+    reflists: [],
+    // ...
+};
+```
+
+### sources.js
+
+Manages categorized source lists and category metadata. This file:
+
+- Loads source lists from Meta-Wiki via the MediaWiki API
+- Fetches reviewed revision IDs from `cite-unseen-revids` repository
+- Stores category descriptions and icons
+- Provides domain matching logic
+
+Defined source list pages (`sources.js:9-48`):
+
+```javascript
+citeUnseenSources: [
+    'advocacy/1',
+    'advocacy/2',
+    'advocacy/3',
+    'advocacy/4',
+    'aiGenerated',
+    'aiReferred',
+    'blogs',
+    'books',
+    'community',
+    'editable',
+    'government',
+    'news',
+    'opinions',
+    'predatory',
+    'press',
+    'satire',
+    'social',
+    'sponsored',
+    'tabloids',
+    'tvPrograms',
+    'zhRSP',      // Chinese reliable sources
+    'zhVGS',      // Chinese video game sources
+    'enRSP',      // English reliable sources
+    'enVGS',      // English video game sources
+    // ... and more
+]
+```
+
+### i18n.js
+
+Handles internationalization and localization. This file:
+
+- Stores translations for all UI strings
+- Provides language detection logic
+- Supports fallback to English for missing translations
+
+The i18n data is structured as nested objects with language codes:
+
+```javascript
+window.CiteUnseenI18n = {
+    someKey: {
+        en: "English text",
+        "zh-hans": "简体中文",
+        "zh-hant": "繁體中文",
+        // ...
+    }
+};
+```
+
+### styles.css
+
+Contains all visual styling for the script, excluding category icons which are defined in the source data. Handles:
+
+- Citation badge styling
+- Tooltip appearance
+- Dashboard UI components
+- Responsive design elements
+
+## Translation Files
+
+The `i18n/` directory contains JSON files for each supported language:
+
+<CodeGroup>
+
+```json en.json
+{
+    "dashboard.title": "Cite Unseen Dashboard",
+    "dashboard.description": "View citation statistics",
+    "category.news": "News source"
+}
+```
+
+```json zh-hans.json
+{
+    "dashboard.title": "引用透视仪表板",
+    "dashboard.description": "查看引用统计",
+    "category.news": "新闻来源"
+}
+```
+
+</CodeGroup>
+
+Supported languages include:
+- Arabic (ar)
+- English (en)
+- Irish (ga)
+- Indonesian (id)
+- Japanese (ja)
+- Korean (ko)
+- Macedonian (mk)
+- Polish (pl)
+- Piedmontese (pms)
+- Pashto (ps)
+- Portuguese (pt)
+- Turkish (tr)
+- Urdu (ur)
+- Cantonese (yue-hant)
+- Simplified Chinese (zh-hans)
+- Traditional Chinese (zh-hant)
+
+## Deployment Versions
+
+### Unbundled Version
+
+In unbundled mode, `main.js` loads dependencies dynamically:
+
+```javascript
+// Loads from gitlab-content.toolforge.org
+await mw.loader.load('//gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/main/styles.css', 'text/css');
+await mw.loader.getScript('//gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/main/i18n.js');
+await mw.loader.getScript('//gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/main/sources.js');
+```
+
+**Advantages:**
+- Easier debugging (separate files)
+- Quick updates without rebuilding
+- Better for development
+
+### Bundled Version
+
+The build process creates `cite-unseen-bundled.js` which:
+
+1. Inlines all CSS into a `<style>` tag
+2. Embeds i18n data as a global variable
+3. Includes sources.js directly
+4. Modifies main.js to skip external loading
+
+**Advantages:**
+- Single file deployment
+- Faster initial load (no additional requests)
+- Better for production use
+
+The bundled version is automatically deployed to the `deploy` branch and served from:
+```
+https://gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/deploy/cite-unseen-bundled.js
+```
+
+## Build Artifacts
+
+When building, the following files are generated in the `build/` directory:
+
+- `cite-unseen-bundled.js`: The bundled script file
+- `README.md`: Build metadata including version, timestamp, and file size
+
+<Note>
+The `build/` directory is not committed to version control. It's generated during the CI/CD process and deployed to the separate `deploy` branch.
+</Note>

@@ -1,0 +1,247 @@
+---
+title: Contributing to Cite Unseen
+description: How to contribute code, translations, and source lists to the Cite Unseen project
+---
+
+Thank you for your interest in contributing to Cite Unseen! This guide will help you get started with contributing to the project.
+
+## Ways to Contribute
+
+There are several ways to contribute to Cite Unseen:
+
+- **Code contributions**: Bug fixes, new features, performance improvements
+- **Translation**: Help translate the interface to new languages
+- **Source lists**: Update and maintain categorized source lists on Meta-Wiki
+- **Documentation**: Improve guides and documentation
+- **Testing**: Report bugs and test new features
+
+## License
+
+Cite Unseen is licensed under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**.
+
+<Note>
+**Important**: By contributing to this project, you agree to license your contributions under CC BY-SA 4.0. This is the same license used by Wikipedia content, ensuring compatibility with the Wikimedia ecosystem.
+</Note>
+
+Key points about the CC BY-SA 4.0 license:
+
+- **Attribution**: You must give appropriate credit to the original authors
+- **ShareAlike**: If you remix or build upon the material, you must distribute your contributions under the same license
+- **Free to use**: Anyone can use, modify, and distribute the code, even commercially
+- **Compatible with Wikipedia**: The license aligns with Wikipedia's content license
+
+Full license text is available in the [LICENSE](https://gitlab.wikimedia.org/kevinpayravi/cite-unseen/-/blob/main/LICENSE) file.
+
+## Getting Started
+
+### Prerequisites
+
+Before contributing code, ensure you have:
+
+- **Git**: For version control
+- **GitLab account**: To submit merge requests
+- **Node.js 22+**: For building the project
+- **Text editor**: Any editor with JavaScript support
+
+### Setting Up Your Development Environment
+
+<Steps>
+
+<Step title="Fork the repository">
+Fork the [Cite Unseen repository](https://gitlab.wikimedia.org/kevinpayravi/cite-unseen) on GitLab to your account.
+</Step>
+
+<Step title="Clone your fork">
+```bash
+git clone https://gitlab.wikimedia.org/YOUR_USERNAME/cite-unseen.git
+cd cite-unseen
+```
+</Step>
+
+<Step title="Create a feature branch">
+```bash
+git checkout -b feature/my-new-feature
+```
+
+Use descriptive branch names like:
+- `feature/add-category-filter`
+- `fix/tooltip-positioning`
+- `translation/add-spanish`
+</Step>
+
+<Step title="Make your changes">
+Edit the relevant source files:
+- `main.js` for core logic
+- `sources.js` for source data
+- `i18n/*.json` for translations
+- `styles.css` for styling
+</Step>
+
+<Step title="Test your changes">
+Build the bundled version:
+```bash
+node build.js
+```
+
+Test by loading the script on a Wikipedia page.
+</Step>
+
+<Step title="Commit your changes">
+```bash
+git add .
+git commit -m "Add descriptive commit message"
+```
+
+Write clear commit messages that explain the "why" behind your changes.
+</Step>
+
+<Step title="Push to your fork">
+```bash
+git push origin feature/my-new-feature
+```
+</Step>
+
+<Step title="Create a merge request">
+Go to your fork on GitLab and click "Create merge request". Provide:
+- **Title**: Concise summary of changes
+- **Description**: Detailed explanation of what changed and why
+- **Testing**: How you tested the changes
+</Step>
+
+</Steps>
+
+## Code Guidelines
+
+### JavaScript Style
+
+- Use **ES6+ syntax** where appropriate
+- Follow **consistent indentation** (tabs or 4 spaces)
+- Add **comments** for complex logic
+- Use **descriptive variable names**
+- Maintain **existing code style** for consistency
+
+### Testing
+
+Before submitting:
+
+1. **Build the bundled version**: Run `node build.js` successfully
+2. **Test on Wikipedia**: Load the script on a real Wikipedia page
+3. **Check multiple browsers**: Test in Chrome, Firefox, and Safari if possible
+4. **Verify existing functionality**: Ensure your changes don't break existing features
+
+## Contributing Translations
+
+To add or update translations:
+
+<Steps>
+
+<Step title="Choose a language">
+Check the `i18n/` directory to see if your language already exists. Language codes follow [BCP 47](https://en.wikipedia.org/wiki/IETF_language_tag):
+- `en.json` - English
+- `zh-hans.json` - Simplified Chinese
+- `zh-hant.json` - Traditional Chinese
+- `ja.json` - Japanese
+- etc.
+</Step>
+
+<Step title="Create or edit the language file">
+If adding a new language, create `i18n/LANGUAGE_CODE.json`:
+
+```json
+{
+    "dashboard.title": "Your translation",
+    "dashboard.description": "Your translation",
+    "category.news": "Your translation",
+    "category.tabloid": "Your translation"
+}
+```
+
+Copy the structure from `i18n/en.json` and translate all values.
+</Step>
+
+<Step title="Test the translation">
+Build and test the script to ensure translations appear correctly.
+</Step>
+
+<Step title="Submit a merge request">
+Follow the standard contribution workflow to submit your translation.
+</Step>
+
+</Steps>
+
+## Updating Source Lists
+
+Source categorization lists are maintained on-wiki at [Meta:Cite Unseen/sources](https://meta.wikimedia.org/wiki/Meta:Cite_Unseen/sources). To update source lists:
+
+1. **Discuss changes**: Propose changes on the talk page for community review
+2. **Edit the appropriate page**: For example, `Meta:Cite Unseen/sources/news` for news sources
+3. **Follow the format**: Maintain the existing list format
+4. **Document reasoning**: Explain why a source belongs in a particular category
+
+<Note>
+Source list changes don't require code changes. The script automatically fetches the latest reviewed versions from Meta-Wiki.
+</Note>
+
+## GitLab Workflow
+
+### Branches
+
+- **`main`**: Development branch with the latest source code
+- **`deploy`**: Contains the bundled version, auto-updated on release
+- **Feature branches**: Created from `main` for new work
+
+### Merge Requests
+
+When creating a merge request:
+
+- **Target the `main` branch**
+- **Provide clear description**: Explain what changed and why
+- **Reference issues**: Link to any related GitLab issues
+- **Be responsive**: Address reviewer feedback promptly
+
+### Releases
+
+Releases are managed by project maintainers:
+
+1. A version tag is created (e.g., `v1.2.0`)
+2. GitLab CI/CD automatically builds the bundled version
+3. The bundled version is deployed to the `deploy` branch
+4. The production deployment on Meta-Wiki is updated
+
+## Code Review Process
+
+All contributions go through code review:
+
+1. **Submit merge request**: Create a merge request following the guidelines above
+2. **Automated checks**: GitLab CI/CD runs build tests
+3. **Maintainer review**: A project maintainer reviews your code
+4. **Feedback**: Address any requested changes
+5. **Approval**: Once approved, a maintainer will merge your contribution
+6. **Release**: Your contribution will be included in the next release
+
+## Community Guidelines
+
+- **Be respectful**: Treat all contributors with respect
+- **Be collaborative**: Work together to find the best solutions
+- **Be patient**: Maintainers are volunteers and may take time to review
+- **Assume good faith**: Give others the benefit of the doubt
+- **Follow Wikipedia principles**: Cite Unseen serves the Wikipedia community
+
+## Getting Help
+
+If you need help:
+
+- **Documentation**: Check the [full documentation](https://meta.wikimedia.org/wiki/Meta:Cite_Unseen)
+- **Issues**: Search [existing issues](https://gitlab.wikimedia.org/kevinpayravi/cite-unseen/-/issues)
+- **New issues**: Open a new issue for bugs or feature requests
+- **Discussions**: Use the Meta-Wiki talk page for general questions
+
+## Recognition
+
+Contributors are acknowledged in:
+
+- Git commit history
+- Release notes
+- The Meta-Wiki documentation page
+
+Thank you for helping make Cite Unseen better for the Wikipedia community!

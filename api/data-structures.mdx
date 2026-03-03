@@ -1,0 +1,270 @@
+---
+title: Data Structures
+description: Core data structures and objects used by Cite Unseen for source categorization and management.
+---
+
+## Overview
+
+Cite Unseen uses several data structures to organize source lists, reliability ratings, and category information. The primary data object is `CiteUnseenData`, which manages source page loading and categorization.
+
+## CiteUnseenData Object
+
+The main data management object for loading and processing source lists from meta.wikimedia.org.
+
+### Properties
+
+<ResponseField name="_sourceRevisions" type="Object | null">
+  Cached revision IDs fetched from the cite-unseen-revids repository. Used to load specific revisions instead of latest versions.
+</ResponseField>
+
+<ResponseField name="citeUnseenSources" type="Array<string>">
+  List of source page names under "Cite Unseen/sources/" prefix on meta.wikimedia.org.
+  
+  Includes:
+  - Advocacy groups: `'advocacy/1'`, `'advocacy/2'`, `'advocacy/3'`, `'advocacy/4'`
+  - AI-related: `'aiGenerated'`, `'aiReferred'`
+  - Content types: `'blogs'`, `'books'`, `'community'`, `'editable'`, `'government'`, `'news'`, `'opinions'`, `'predatory'`, `'press'`, `'satire'`, `'social'`, `'sponsored'`, `'tabloids'`, `'tvPrograms'`
+  - Reliability checklists: `'zhRSP'`, `'zhVGS'`, `'zhACGS'`, `'enRSP'`, `'enVGS'`, `'enAMS'`, `'enJAPANS'`, `'enKOREAS'`, `'enAS'`, `'enFILMR'`, `'enNPPSG/1'`, `'enNPPSG/2'`, `'frJVS'`, `'ruAIKI'`, `'enBGS'`, `'enCHARTS'`, `'enVSAFES'`, `'viDSNDTC'`
+</ResponseField>
+
+<ResponseField name="citeUnseenCategoryTypes" type="Array<string>">
+  List of source category types:
+  ```javascript
+  ['advocacy', 'aiGenerated', 'aiReferred', 'blogs', 'books', 'community',
+   'editable', 'government', 'news', 'opinions', 'predatory', 'press',
+   'satire', 'social', 'sponsored', 'tabloids', 'tvPrograms']
+  ```
+</ResponseField>
+
+### citeUnseenChecklists
+
+<ResponseField name="citeUnseenChecklists" type="Array<Array<string, Array<Array<string, string>>>>">
+  Reliability checklists grouped by rating category. Structure:
+  ```
+  [ [categoryType, [[checklistName, categoryID], ...]], ... ]
+  ```
+</ResponseField>
+
+**Categories:**
+
+1. **blacklisted**: Sources that should not be used
+   - `["enRSP", "enRspBlacklisted"]`
+   - `["zhRSP", "zhRspBlacklisted"]`
+   - `["enKOREAS", "enKoreasBlacklisted"]`
+   - `["enVSAFES", "enVsafesBlacklisted"]`
+   - `["viDSNDTC", "viDsndtcBlacklisted"]`
+
+2. **deprecated**: Sources that were reliable but no longer recommended
+   - `["enRSP", "enRspDeprecated"]`
+   - `["zhRSP", "zhRspDeprecated"]`
+   - `["enCHARTS", "enChartsDeprecated"]`
+
+3. **generallyUnreliable**: Sources generally considered unreliable
+   - Includes entries from enRSP, zhRSP, enAMS, enAS, enJAPANS, enKOREAS, enNPPSG/1, enVGS, zhACGS, zhVGS, enFILMR, frJVS, ruAIKI, enBGS, enCHARTS, enVSAFES, viDSNDTC
+
+4. **marginallyReliable**: Sources with limited reliability
+   - Includes entries from enRSP, zhRSP, enAMS, enJAPANS, enKOREAS, enVGS, zhACGS, zhVGS, frJVS, enBGS, enVSAFES, viDSNDTC
+
+5. **multi**: Sources with no consensus on reliability
+   - Includes entries from enRSP, zhRSP, enNPPSG/2, enVGS, zhACGS, zhVGS, enVSAFES, viDSNDTC
+
+6. **generallyReliable**: Sources generally considered reliable
+   - Includes entries from enRSP, zhRSP, enAMS, enAS, enJAPANS, enKOREAS, enNPPSG/2, enVGS, zhACGS, zhVGS, enFILMR, frJVS, ruAIKI, enBGS, enCHARTS, enVSAFES, viDSNDTC
+
+### Mapping Objects
+
+<ResponseField name="citeUnseenSourceToCategoryMapping" type="Object<string, string>">
+  Maps source page names to their corresponding categories. Used when multiple source pages map to a single category.
+  
+  ```javascript
+  {
+    'advocacy1': 'advocacy',
+    'advocacy2': 'advocacy',
+    'advocacy3': 'advocacy',
+    'advocacy4': 'advocacy'
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="citeUnseenSourceToPageMapping" type="Object<string, string>">
+  Maps source checklist names to their corresponding Wikipedia pages.
+  
+  Example entries:
+  ```javascript
+  {
+    'enRSP': 'en:Wikipedia:Reliable sources/Perennial sources',
+    'zhRSP': 'zh:维基百科:可靠来源/常见有争议来源列表',
+    'enVGS': 'en:Wikipedia:WikiProject Video games/Sources',
+    'enAMS': 'en:Wikipedia:WikiProject Anime and manga/Online reliable sources'
+    // ... and more
+  }
+  ```
+</ResponseField>
+
+## Category Data
+
+### citeUnseenCategories
+
+<ResponseField name="citeUnseenCategories" type="Object<string, boolean>">
+  Default toggle settings for categories. Unstated categories default to `true`.
+  
+  ```javascript
+  {
+    "unknown": true
+  }
+  ```
+</ResponseField>
+
+### citeUnseenCategoryData
+
+<ResponseField name="citeUnseenCategoryData" type="Object<string, Object>">
+  Category metadata including icons and counters. Each category has:
+  - `icon`: Base64-encoded PNG data URI
+  - `count`: Number of citations in this category (initialized to 0)
+</ResponseField>
+
+**Available Categories:**
+- `advocacy`: Advocacy groups
+- `aiGenerated`: AI-generated content
+- `aiReferred`: AI referrer in URL
+- `blogs`: Blog posts
+- `books`: Book publications
+- `community`: Community-created news
+- `editable`: Community-maintained sources
+- `government`: State-affiliated or government sources
+- `news`: News articles
+- `opinions`: Opinion pieces
+- `predatory`: Predatory journals
+- `press`: Press releases
+- `satire`: Satirical content
+- `social`: Social media
+- `sponsored`: Sponsored content
+- `tabloids`: Tabloid publications
+- `tvPrograms`: TV programs
+- `blacklisted`: Blacklisted sources
+- `deprecated`: Deprecated sources
+- `generallyReliable`: Generally reliable sources
+- `generallyUnreliable`: Generally unreliable sources
+- `marginallyReliable`: Marginally reliable sources
+- `multi`: No consensus sources
+- `unknown`: Unknown/uncategorized sources
+
+## Methods
+
+### getCategorizedRules()
+
+<ParamField path="" type="Promise<Object<string, Object[]>>">
+  Async method to fetch and return categorized rules from meta.wikimedia.org
+</ParamField>
+
+<ResponseField name="result" type="Object<string, Object[]>">
+  Object mapping category IDs to arrays of rule objects. Each rule object contains fields like `url`, `author`, `pub`, `date`, `url_str`.
+</ResponseField>
+
+Uses 24-hour localStorage caching. Automatically uses specified revision IDs when available, otherwise fetches latest revisions.
+
+```javascript
+const rules = await CiteUnseenData.getCategorizedRules();
+// Returns: { "enRspBlacklisted": [{url: "example.com"}, ...], ... }
+```
+
+### resolveSourceToCategory()
+
+<ParamField path="sourcePageName" type="string" required>
+  Source page name to resolve
+</ParamField>
+
+<ResponseField name="result" type="string">
+  Resolved category name, or original name if no mapping exists
+</ResponseField>
+
+```javascript
+const category = CiteUnseenData.resolveSourceToCategory("advocacy1");
+// Returns: "advocacy"
+```
+
+### resolveSourceToPageLink()
+
+<ParamField path="sourceName" type="string" required>
+  Source checklist name to resolve
+</ParamField>
+
+<ResponseField name="result" type="string | null">
+  Wiki page link (e.g., "en:Wikipedia:...") or null if no mapping exists
+</ResponseField>
+
+```javascript
+const link = CiteUnseenData.resolveSourceToPageLink("enRSP");
+// Returns: "en:Wikipedia:Reliable sources/Perennial sources"
+```
+
+### getSourcePagesForCategory()
+
+<ParamField path="categoryName" type="string" required>
+  Category name to find source pages for
+</ParamField>
+
+<ResponseField name="result" type="Array<string>">
+  Array of source page names that map to the category
+</ResponseField>
+
+```javascript
+const sources = CiteUnseenData.getSourcePagesForCategory("advocacy");
+// Returns: ["advocacy1", "advocacy2", "advocacy3", "advocacy4"]
+```
+
+### isValidData()
+
+<ParamField path="data" type="Object" required>
+  Data object to validate
+</ParamField>
+
+<ResponseField name="result" type="boolean">
+  True if data object has valid structure, false otherwise
+</ResponseField>
+
+Validates that the data object has the correct structure with proper types for all required fields.
+
+## Internal Data Structures
+
+### COinS Object
+
+Parsed citation metadata object with fields:
+- `rft.title`: Citation title
+- `rft.au`: Author(s) - string or array
+- `rft.aulast`: Author last name(s)
+- `rft.aufirst`: Author first name(s)
+- `rft.pub`: Publisher
+- `rft.jtitle`: Journal title
+- `rft.date`: Publication date
+- `rft_id`: URL(s) - string or array
+- `rfr_id`: Referrer ID (fallback for rft_id)
+
+### Rule Object
+
+Matching rule with optional fields:
+- `url`: Domain to match (string)
+- `url_str`: URL substring to match (string)
+- `author`: Author regex pattern (string)
+- `pub`: Publisher regex pattern (string)
+- `date`: Date rule string (string)
+- `_cachedAuthorRegex`: Cached RegExp for author (internal)
+- `_cachedPublisherRegex`: Cached RegExp for publisher (internal)
+
+### Match Result Object
+
+Reliability match result:
+- `type`: Category type ("blacklisted", "deprecated", etc.)
+- `name`: Checklist name ("enRSP", "zhRSP", etc.)
+- `language`: Language code ("en", "zh", etc.)
+- `spec`: Specificity score (number) - higher means more conditions matched
+
+### Reflist Data Object
+
+Data structure for tracking citations in a reference list:
+- `element`: DOM element of the reflist
+- `refs`: Array of citation objects in this reflist
+- `categories`: Object mapping category names to arrays of citation elements
+- `dashboard`: Dashboard object for this reflist
+- `selectedCategories`: Set of currently selected filter categories
+- `totalCitations`: Total number of citations in this reflist

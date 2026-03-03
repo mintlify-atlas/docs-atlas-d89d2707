@@ -1,0 +1,283 @@
+---
+title: Building Cite Unseen
+description: Instructions for building the bundled version of Cite Unseen from source
+---
+
+This guide explains how to build the bundled version of Cite Unseen from the source files.
+
+## Prerequisites
+
+Before building, ensure you have:
+
+- **Node.js 22+**: The build script requires Node.js
+- **Source files**: Clone the repository from GitLab
+
+## Build Process Overview
+
+The build process combines all source files into a single bundled JavaScript file that can be deployed to Wikipedia. The build script (`build.js`) performs the following steps:
+
+<Steps>
+
+<Step title="Read source files">
+The script reads all component files from the repository:
+
+```javascript
+const styles = fs.readFileSync('styles.css', 'utf8');
+const sources = fs.readFileSync('sources.js', 'utf8');
+const main = fs.readFileSync('main.js', 'utf8');
+```
+</Step>
+
+<Step title="Process i18n files">
+Translation JSON files are read from the `i18n/` directory and converted into a nested structure:
+
+```javascript
+const i18nDir = 'i18n';
+const i18nFiles = fs.readdirSync(i18nDir).filter(file => file.endsWith('.json'));
+const i18nData = {};
+
+for (const file of i18nFiles) {
+    const lang = path.basename(file, '.json');
+    const content = fs.readFileSync(path.join(i18nDir, file), 'utf8');
+    const langKey = lang.startsWith('zh-') ? lang.substring(3) : lang;
+    i18nData[langKey] = JSON.parse(content);
+}
+```
+
+The flat i18n structure is then converted to a nested structure where each key has translations for multiple languages.
+</Step>
+
+<Step title="Inline CSS styles">
+CSS is embedded directly into the bundled file as an inline style tag:
+
+```javascript
+const css = `${styles.replace(/`/g, '\\`').replace(/\$/g, '\\$')}`;
+const style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = css;
+document.head.appendChild(style);
+```
+</Step>
+
+<Step title="Bundle components">
+All components are combined with proper escaping and metadata:
+
+```javascript
+let bundled = `// Cite Unseen - Bundled Version
+// Maintainers: SuperHamster and SuperGrey
+// Repository: https://gitlab.wikimedia.org/kevinpayravi/cite-unseen
+// Release: ${process.env.CI_COMMIT_TAG}
+// Timestamp: ${new Date().toISOString()}
+
+(function() {
+    'use strict';
+    
+    // Inject CSS styles
+    // ... CSS injection code ...
+    
+    // Load i18n data
+    // ... i18n data ...
+
+    // Load sources data  
+    // ... sources.js content ...
+
+    // Main script with modified importDependencies function
+    // ... modified main.js ...
+})();`;
+```
+</Step>
+
+<Step title="Modify main.js">
+The main script is modified to remove external dependency loading since everything is bundled:
+
+```javascript
+const modifiedMain = main.replace(
+    /await mw\.loader\.load\('.*styles\.css.*', 'text\/css'\);?\s*/g,
+    '// CSS already injected above\n'
+).replace(
+    /await mw\.loader\.getScript\('.*i18n\.js.*'\);?\s*/g,
+    '// i18n.js already loaded above\n'
+).replace(
+    /await mw\.loader\.getScript\('.*sources\.js.*'\);?\s*/g,
+    '// sources.js already loaded above\n'
+);
+```
+</Step>
+
+<Step title="Write output files">
+The bundled file and metadata are written to the `build/` directory:
+
+```javascript
+if (!fs.existsSync('build')) {
+    fs.mkdirSync('build');
+}
+
+fs.writeFileSync('build/cite-unseen-bundled.js', bundled);
+
+const bundledSize = fs.statSync('build/cite-unseen-bundled.js').size;
+console.log(`Bundled file: ${bundledSize} bytes`);
+```
+</Step>
+
+</Steps>
+
+## Running the Build
+
+### Local Build
+
+To build locally, navigate to the project directory and run:
+
+```bash
+node build.js
+```
+
+You should see output like:
+
+```
+Building Cite Unseen bundled version...
+Build completed!
+Bundled file: 215847 bytes
+Files created:
+- build/cite-unseen-bundled.js
+- build/README.md
+```
+
+### CI/CD Build
+
+The GitLab CI/CD pipeline automatically builds the bundled version when a new tag is created. The pipeline is defined in `.gitlab-ci.yml`:
+
+<CodeGroup>
+
+```yaml Build Stage
+build:
+  stage: build
+  image: node:22-alpine
+  script:
+    - echo "Building bundled version of Cite Unseen..."
+    - node build.js
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 hour
+  rules:
+    - if: $CI_COMMIT_TAG
+```
+
+```yaml Deploy Stage
+deploy:
+  stage: deploy
+  image: alpine/git:latest
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - echo "Deploying to $DEPLOY_BRANCH branch..."
+    - |
+      if git ls-remote --exit-code --heads origin "$DEPLOY_BRANCH" >/dev/null 2>&1; then
+        git checkout -B "$DEPLOY_BRANCH" "origin/$DEPLOY_BRANCH"
+      else
+        git checkout --orphan "$DEPLOY_BRANCH"
+        git rm -rf . || true
+      fi
+    - cp build/cite-unseen-bundled.js .
+    - cp build/README.md .
+    - git add cite-unseen-bundled.js README.md
+    - |
+      if git diff --cached --quiet; then
+        echo "No changes to deploy."
+      else
+        git commit -m "Deploy bundled version from ${CI_COMMIT_SHA}"
+        git push origin "$DEPLOY_BRANCH"
+      fi
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: on_success
+```
+
+</CodeGroup>
+
+## Build Output
+
+The build process creates two files in the `build/` directory:
+
+### cite-unseen-bundled.js
+
+The main bundled file containing:
+- Header comment with version information
+- IIFE wrapper for scope isolation
+- Inline CSS styles
+- i18n data
+- Source categorization data
+- Modified main script
+
+### README.md
+
+Build metadata including:
+- Release tag (from `CI_COMMIT_TAG` environment variable)
+- Source commit SHA
+- Build timestamp
+- Bundled file size
+- Usage instructions
+
+## Deployment
+
+After building, the bundled version is deployed to the `deploy` branch where it can be accessed via:
+
+```javascript
+await mw.loader.getScript('//gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/deploy/cite-unseen-bundled.js?mime=text/javascript');
+```
+
+This URL is used in the production deployment on Meta-Wiki.
+
+## Verifying the Build
+
+To verify your build was successful:
+
+<Steps>
+
+<Step title="Check file size">
+The bundled file should be approximately 200-250 KB. Significantly different sizes may indicate an issue.
+</Step>
+
+<Step title="Inspect the output">
+Open `build/cite-unseen-bundled.js` and verify:
+- The header comment includes version info
+- The IIFE wrapper is present
+- CSS styles are inlined
+- i18n data is embedded
+</Step>
+
+<Step title="Test locally">
+You can test the bundled version by:
+1. Copying the contents of `cite-unseen-bundled.js`
+2. Pasting it into your browser console on a Wikipedia page
+3. Verifying that citation icons appear
+</Step>
+
+</Steps>
+
+<Note>
+Environment variables like `CI_COMMIT_TAG` and `CI_COMMIT_SHA` are only available in the GitLab CI/CD environment. Local builds will show `undefined` for these values.
+</Note>
+
+## Troubleshooting
+
+### Build fails with "Cannot find module"
+
+Ensure you're running the build from the repository root directory where `build.js` and all source files are located.
+
+### File size is too small
+
+This may indicate that some source files weren't read properly. Check that all files exist:
+- `main.js`
+- `sources.js`
+- `i18n.js`
+- `styles.css`
+- `i18n/*.json`
+
+### Deployment fails
+
+Check that:
+- The `DEPLOY_TOKEN` environment variable is set in GitLab CI/CD settings
+- You have permission to push to the repository
+- The git configuration in `.gitlab-ci.yml` is correct

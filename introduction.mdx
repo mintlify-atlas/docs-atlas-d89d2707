@@ -1,0 +1,115 @@
+---
+title: Introduction
+description: Cite Unseen adds categorical icons to Wikipedia citations for quick reliability evaluation at a glance.
+---
+
+# Welcome to Cite Unseen
+
+Cite Unseen is a Wikipedia user script that adds categorical icons to citations, providing readers and editors with a quick initial evaluation of sources at a glance.
+
+<CardGroup cols={2}>
+  <Card title="Install the Script" icon="download" href="/installation">
+    Get started with Cite Unseen on Wikipedia in minutes
+  </Card>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Learn how to use Cite Unseen effectively
+  </Card>
+  <Card title="Full Documentation" icon="book" href="https://meta.wikimedia.org/wiki/Meta:Cite_Unseen">
+    View comprehensive documentation on Meta-Wiki
+  </Card>
+  <Card title="Source Code" icon="code" href="https://gitlab.wikimedia.org/kevinpayravi/cite-unseen">
+    Explore the code repository on GitLab
+  </Card>
+</CardGroup>
+
+## What does Cite Unseen do?
+
+Cite Unseen analyzes citations on Wikipedia articles and displays categorical icons that indicate:
+
+- **Reliability ratings** - Based on community consensus from Wikipedia's reliable sources guidelines
+- **Source types** - Identifies news, books, social media, blogs, and more
+- **Special categories** - Flags AI-generated content, press releases, satire, and other noteworthy characteristics
+
+<Info>
+Cite Unseen uses categorized source lists maintained on Meta-Wiki at [Meta:Cite Unseen/sources](https://meta.wikimedia.org/wiki/Meta:Cite_Unseen/sources), which are regularly updated based on community consensus.
+</Info>
+
+## Key features
+
+### Visual citation indicators
+
+Each citation displays icons that show:
+- Whether a source is generally reliable, marginally reliable, or unreliable
+- The type of publication (news, blog, book, social media, etc.)
+- Special attributes like sponsored content, satire, or AI generation
+
+### Interactive dashboard
+
+The script adds a dashboard above reference lists that allows you to:
+- View counts of citations by category
+- Filter citations by multiple categories simultaneously
+- Quickly identify and review specific types of sources
+
+### Customizable categories
+
+You can configure which categories to display, including:
+
+**Reliability categories:**
+- Blacklisted
+- Deprecated
+- Generally unreliable
+- Marginally reliable
+- Generally reliable
+- No consensus (multi)
+
+**Type categories:**
+- News, books, blogs
+- Social media
+- TV/radio programs
+- Press releases
+- Opinion pieces
+- And more
+
+<Note>
+Reliability ratings are based on community consensus documented on Wikipedia's reliable sources pages for each language wiki.
+</Note>
+
+### Multi-language support
+
+Cite Unseen supports internationalization with translations for:
+- English, Arabic, Chinese (Simplified & Traditional)
+- Japanese, Korean, Polish, Portuguese
+- Turkish, Urdu, and more
+
+## How it works
+
+Cite Unseen processes citations by:
+
+1. **Analyzing COinS metadata** embedded in Wikipedia citation templates
+2. **Matching sources** against categorized domain lists and URL patterns
+3. **Applying rules** based on publisher, author, date, and URL characteristics
+4. **Displaying icons** with tooltips that explain each categorization
+
+<Tip>
+For reliability categories, Cite Unseen prioritizes ratings from your current language wiki, but can also show ratings from other language Wikipedias when local ratings aren't available.
+</Tip>
+
+## Who maintains Cite Unseen?
+
+Cite Unseen is maintained by SuperHamster and SuperGrey, with the source code hosted on [GitLab Wikimedia](https://gitlab.wikimedia.org/kevinpayravi/cite-unseen).
+
+The project is licensed under **Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)**.
+
+## Ready to get started?
+
+<Steps>
+  <Step title="Install the script">
+    Follow the [installation guide](/installation) to add Cite Unseen to your Wikipedia account
+  </Step>
+  <Step title="Learn the basics">
+    Read the [quick start guide](/quickstart) to understand how to use the features
+  </Step>
+  <Step title="Customize your settings">
+    Configure which categories to display and customize your experience
+  </Step>
+</Steps>

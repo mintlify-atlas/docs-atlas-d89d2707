@@ -1,0 +1,375 @@
+---
+title: Configuration Options
+description: Customize Cite Unseen behavior with global configuration variables
+---
+
+Cite Unseen can be customized using global JavaScript variables. These variables control which categories are enabled, which domains to ignore, and various display options.
+
+## Configuration Variables
+
+All configuration is done through global variables prefixed with `cite_unseen_`:
+
+```javascript
+// From main.js:28-36
+globalVars: [
+  'cite_unseen_categories',
+  'cite_unseen_domain_ignore',
+  'cite_unseen_additional_domains',
+  'cite_unseen_additional_strings',
+  'cite_unseen_dashboard',
+  'cite_unseen_show_suggestions',
+  'cite_unseen_hide_social_media_reliability_ratings'
+]
+```
+
+## Category Control
+
+### `cite_unseen_categories`
+
+Enable or disable specific citation categories.
+
+**Type:** Object  
+**Default:** All categories enabled
+
+```javascript
+window.cite_unseen_categories = {
+  // Reliability categories
+  blacklisted: true,
+  deprecated: true,
+  generallyUnreliable: true,
+  marginallyReliable: true,
+  generallyReliable: true,
+  multi: true,
+  
+  // Type categories
+  news: true,
+  blogs: true,
+  social: true,
+  opinions: true,
+  books: true,
+  press: true,
+  tvPrograms: true,
+  advocacy: true,
+  community: true,
+  editable: true,
+  government: true,
+  predatory: true,
+  satire: true,
+  sponsored: true,
+  tabloids: true,
+  aiGenerated: true,
+  aiReferred: true,
+  
+  // Other
+  unknown: true
+};
+```
+
+### Example: Disable Specific Categories
+
+```javascript
+// Only show reliability ratings, hide type categories
+window.cite_unseen_categories = {
+  blogs: false,
+  social: false,
+  press: false,
+  opinions: false
+};
+```
+
+<Note>
+Categories not explicitly set will retain their default enabled state.
+</Note>
+
+## Domain Management
+
+### `cite_unseen_domain_ignore`
+
+Exclude specific domains from categorization.
+
+**Type:** Object  
+**Default:** Empty for all categories
+
+```javascript
+window.cite_unseen_domain_ignore = {
+  news: ['example.com', 'another-site.org'],
+  social: ['corporate-blog.social.platform.com']
+};
+```
+
+Domains in the ignore list will not be marked with the corresponding category icon, even if they match the built-in rules.
+
+### Example: Ignore Subdomains
+
+```javascript
+window.cite_unseen_domain_ignore = {
+  blogs: [
+    'official.company.com',  // Ignore corporate blog
+    'news.university.edu'    // Treat as primary source
+  ]
+};
+```
+
+## Custom Categorization
+
+### `cite_unseen_additional_domains`
+
+Add custom domains to categories.
+
+**Type:** Object  
+**Default:** Empty for all categories
+
+```javascript
+window.cite_unseen_additional_domains = {
+  news: ['localnews.com', 'regionalpaper.org'],
+  blogs: ['myblog.net']
+};
+```
+
+See [Custom Domains](/advanced/custom-domains) for detailed information.
+
+### `cite_unseen_additional_strings`
+
+Add custom URL patterns to categories.
+
+**Type:** Object  
+**Default:** Empty for all categories
+
+```javascript
+window.cite_unseen_additional_strings = {
+  opinions: ['/opinion/', '/editorial/'],
+  blogs: ['/blog/', '/author/']
+};
+```
+
+See [Custom Domains](/advanced/custom-domains) for detailed information.
+
+## Display Options
+
+### `cite_unseen_dashboard`
+
+Control whether the citation dashboard appears above reference lists.
+
+**Type:** Boolean  
+**Default:** `true`
+
+```javascript
+// Hide the dashboard
+window.cite_unseen_dashboard = false;
+```
+
+The dashboard shows:
+- Total citation count
+- Citation count by category
+- Interactive filtering controls
+
+<Tabs>
+  <Tab title="Enabled">
+    When enabled, users see a dashboard above each reference list with category counts and filtering options.
+  </Tab>
+  <Tab title="Disabled">
+    When disabled, only the icons appear next to citations. No dashboard or filtering interface is shown.
+  </Tab>
+</Tabs>
+
+### `cite_unseen_show_suggestions`
+
+Enable or disable the "Suggest Categories" button that allows users to propose new categorizations.
+
+**Type:** Boolean  
+**Default:** `true`
+
+```javascript
+// Hide the suggestions button
+window.cite_unseen_show_suggestions = false;
+```
+
+### `cite_unseen_hide_social_media_reliability_ratings`
+
+Hide generic reliability ratings for social media sources from unrated publishers.
+
+**Type:** Boolean  
+**Default:** `false`
+
+```javascript
+// Hide generic social media reliability ratings
+window.cite_unseen_hide_social_media_reliability_ratings = true;
+```
+
+This is useful when you want to show reliability icons only for social media posts from specific publishers or authors that have been explicitly rated, not for all social media links.
+
+```javascript
+// From main.js:620
+const hideSocialMediaReliabilityRating = 
+  window.cite_unseen_hide_social_media_reliability_ratings === true && 
+  typeMatches.includes('social');
+
+if (hideSocialMediaReliabilityRating && reliabilityMatch.spec === 0.0) {
+  continue;  // Skip generic reliability ratings for social media
+}
+```
+
+### `cite_unseen_show_other_language_reliability_ratings`
+
+Show reliability ratings from other language Wikipedias even when ratings from the current language exist.
+
+**Type:** Boolean  
+**Default:** `false`
+
+```javascript
+// Show reliability ratings from all languages
+window.cite_unseen_show_other_language_reliability_ratings = true;
+```
+
+By default, Cite Unseen shows only ratings from your current language's Wikipedia. When enabled, you'll also see ratings from other language versions.
+
+```javascript
+// From main.js:446-450
+if (window.cite_unseen_show_other_language_reliability_ratings === true) {
+  return results.current.concat(results.other);
+} else {
+  return results.current.length > 0 ? results.current : results.other;
+}
+```
+
+## Configuration Priority
+
+Cite Unseen loads configuration in this order (later settings override earlier ones):
+
+1. **Built-in defaults** - Base configuration from the script
+2. **Meta-Wiki global settings** - From `meta.wikimedia.org/wiki/User:YourUsername/CiteUnseen-Rules.js`
+3. **Local wiki settings** - From your local wiki's `User:YourUsername/CiteUnseen-Rules.js`
+
+```javascript
+// From main.js:1228-1232
+function mergeRules(metaRules, localRules) {
+  // Mergeable properties (arrays) are combined
+  // Boolean properties: local takes precedence
+  // If only one exists, use that one
+}
+```
+
+<CodeGroup>
+```javascript Meta-Wiki Global Settings
+// meta.wikimedia.org/wiki/User:Alice/CiteUnseen-Rules.js
+window.cite_unseen_dashboard = true;
+window.cite_unseen_categories = {
+  blogs: false
+};
+```
+
+```javascript Local Wiki Settings
+// en.wikipedia.org/wiki/User:Alice/CiteUnseen-Rules.js
+window.cite_unseen_dashboard = false;  // Overrides global
+window.cite_unseen_categories = {
+  social: false  // Merged with global
+};
+// Result: dashboard=false, blogs=false, social=false
+```
+</CodeGroup>
+
+## Rule Merging Behavior
+
+### Mergeable Properties (Arrays/Objects)
+
+These properties are **merged** between Meta-Wiki and local settings:
+- `categories`
+- `domainIgnore`
+- `additionalDomains`
+- `additionalStrings`
+
+```javascript
+// From main.js:1233-1258
+mergeableProps.forEach(prop => {
+  if (localValue && metaValue) {
+    merged[prop] = {};
+    // Combine Meta and local values
+    if (Array.isArray(metaValue[key]) && Array.isArray(localValue[key])) {
+      // For arrays, combine and remove duplicates
+      merged[prop][key] = [...new Set([...metaValue[key], ...localValue[key]])];
+    } else {
+      merged[prop][key] = localValue[key];  // Local overrides
+    }
+  }
+});
+```
+
+### Boolean Properties
+
+These properties use **local precedence** (local settings override global):
+- `dashboard`
+- `showSuggestions`
+- `hideSocialMediaReliabilityRatings`
+- `showOtherLanguageReliabilityRatings`
+
+```javascript
+// From main.js:1260-1270
+booleanProps.forEach(prop => {
+  if (localValue !== undefined) {
+    merged[prop] = localValue;  // Local takes precedence
+  } else if (metaValue !== undefined) {
+    merged[prop] = metaValue;
+  }
+});
+```
+
+## Complete Configuration Example
+
+```javascript
+// User:YourUsername/CiteUnseen-Rules.js
+
+// Control which categories are shown
+window.cite_unseen_categories = {
+  unknown: false,           // Hide unknown citations
+  aiReferred: true,         // Show AI-referred warnings
+  opinions: true            // Show opinion pieces
+};
+
+// Ignore specific domains
+window.cite_unseen_domain_ignore = {
+  social: ['linkedin.com'],  // Don't mark LinkedIn as social media
+  blogs: ['techcrunch.com']  // Treat as news instead of blog
+};
+
+// Add custom domains
+window.cite_unseen_additional_domains = {
+  news: [
+    'mynewssite.com',
+    'localpaper.org'
+  ]
+};
+
+// Add custom URL patterns
+window.cite_unseen_additional_strings = {
+  opinions: ['/opinion/', '/editorial/'],
+  press: ['/press-release/', '/pr/']
+};
+
+// Display settings
+window.cite_unseen_dashboard = true;
+window.cite_unseen_show_suggestions = true;
+window.cite_unseen_hide_social_media_reliability_ratings = true;
+window.cite_unseen_show_other_language_reliability_ratings = false;
+```
+
+## Accessing Configuration
+
+The script stores loaded configuration in internal properties:
+
+```javascript
+// From main.js:1353-1362
+CiteUnseen._metaRules = {
+  categories: metaState.categories || {},
+  domainIgnore: metaState.domainIgnore || {},
+  additionalDomains: metaState.additionalDomains || {},
+  additionalStrings: metaState.additionalStrings || {},
+  dashboard: metaState.dashboard !== undefined ? metaState.dashboard : true,
+  showSuggestions: metaState.showSuggestions !== undefined ? metaState.showSuggestions : true,
+  hideSocialMediaReliabilityRatings: metaState.hideSocialMediaReliabilityRatings === true || false,
+  showOtherLanguageReliabilityRatings: metaState.showOtherLanguageReliabilityRatings === true || false
+};
+```
+
+<Note>
+Changes to configuration require a page reload to take effect. The script loads configuration once during initialization.
+</Note>

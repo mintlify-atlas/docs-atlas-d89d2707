@@ -1,0 +1,93 @@
+---
+title: Development Overview
+description: High-level architecture and development approach for Cite Unseen
+---
+
+Cite Unseen is a Wikipedia user script that adds categorical icons to citations, providing readers and editors with a quick initial evaluation of sources at a glance. This page provides an overview of the project architecture and development philosophy.
+
+## Architecture
+
+Cite Unseen is built as a modular user script designed to run on Wikipedia and other Wikimedia wikis. The architecture separates concerns into distinct components:
+
+### Core Components
+
+- **Main Script** (`main.js`): The entry point that orchestrates the entire application
+- **Source Data** (`sources.js`): Manages categorized source lists and category definitions
+- **Internationalization** (`i18n.js`): Handles translations and localization
+- **Styles** (`styles.css`): Visual styling (except categorization icons which are defined in source data)
+
+### Deployment Modes
+
+The script supports two deployment modes:
+
+1. **Unbundled Mode**: Individual files loaded dynamically from GitLab via `gitlab-content.toolforge.org`
+2. **Bundled Mode**: Single minified file containing all components for production deployment
+
+## Data Sources
+
+Cite Unseen relies on community-maintained data:
+
+### Source Lists
+
+Categorized source lists are maintained on Meta-Wiki at [Meta:Cite Unseen/sources](https://meta.wikimedia.org/wiki/Meta:Cite_Unseen/sources). These lists include:
+
+- News sources (reliable, tabloids, etc.)
+- Opinion and blog sources
+- Government sources
+- AI-generated content indicators
+- Community-specific reliability ratings (e.g., Wikipedia:Reliable sources)
+- Language-specific source lists (Chinese, English, French, Russian, Vietnamese)
+
+### Revision Tracking
+
+The script tracks reviewed revision IDs from the [cite-unseen-revids](https://gitlab.wikimedia.org/kevinpayravi/cite-unseen-revids) repository to ensure it uses vetted versions of source lists.
+
+## Development Philosophy
+
+### Community-Driven
+
+Cite Unseen categorizations are based on community consensus. Source lists are maintained on-wiki where the broader Wikipedia community can review and update them.
+
+### Modular Design
+
+The separation of concerns allows:
+
+- Independent updates to styling, translations, and source data
+- Easy testing of individual components
+- Flexible deployment options
+
+### Performance
+
+The script is optimized for:
+
+- Minimal page load impact
+- Efficient DOM manipulation
+- Caching of source lists
+
+## Development Tools
+
+### Required Software
+
+- **Node.js 22+**: For running the build script
+- **Git**: For version control
+
+### Optional Tools
+
+- **GitLab CI/CD**: Automated builds and deployments (configured in `.gitlab-ci.yml`)
+- **Text editor**: Any editor with JavaScript syntax highlighting
+
+## Contributing
+
+Contributions are welcome! See the [Contributing guide](/development/contributing) for details on:
+
+- Code style guidelines
+- Testing procedures
+- Submission process
+
+## License
+
+Cite Unseen is licensed under [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/), consistent with Wikipedia's content license.
+
+<Note>
+All contributions must be compatible with the CC BY-SA 4.0 license. By contributing, you agree to license your contributions under the same terms.
+</Note>

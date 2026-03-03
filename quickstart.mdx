@@ -1,80 +1,265 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick Start
+description: Learn how to use Cite Unseen to evaluate citation reliability and filter sources on Wikipedia.
 ---
 
-## Get started in three steps
+# Quick Start Guide
 
-Get your documentation site running locally and make your first customization.
+This guide will help you start using Cite Unseen effectively to evaluate citations on Wikipedia.
 
-### Step 1: Set up your local environment
+<Note>
+Make sure you've [installed Cite Unseen](/installation) before following this guide.
+</Note>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+## Understanding citation icons
+
+When you view a Wikipedia article with Cite Unseen enabled, you'll see small icons next to citations in the references section.
+
+### Reliability icons
+
+These icons indicate community consensus about source reliability:
+
+- **Generally reliable** - Editors generally agree this source is reliable in its area of expertise
+- **Marginally reliable** - May need case-by-case review for context-specific reliability
+- **Generally unreliable** - Community considers this source unreliable (may still be used for self-descriptions)
+- **Deprecated** - Should not be used (except for non-controversial self-descriptions)
+- **Blacklisted** - Blacklisted due to persistent abuse or spam
+- **No consensus (multi)** - No community consensus; reliability may depend on subject area, author, or date
+
+<Info>
+Reliability ratings come from Wikipedia's reliable sources pages. Cite Unseen prioritizes ratings from your current language wiki but can display ratings from other language Wikipedias when local ratings aren't available.
+</Info>
+
+### Source type icons
+
+These icons identify the type of publication:
+
+- **News** - Journalistic reporting under an editorial process
+- **Books** - Publications such as books, journals, or printed material
+- **Social media** - Social media websites or posts
+- **Blogs** - Blog posts
+- **TV programs** - TV or radio programs
+- **Press releases** - Official press releases
+- **Opinion pieces** - Opinion or editorial content
+
+### Special attribute icons
+
+These icons flag specific characteristics:
+
+- **AI-generated** - Associated with unedited AI-generated content
+- **AI-referred** - URL includes tracking from AI assistants (like `utm_source=chatgpt.com`)
+- **Editable** - Community-editable sources like wikis or databases
+- **Sponsored** - Sponsored content or promotional material
+- **Satire** - Satirical or parody content
+- **Tabloids** - Tabloid or gossip news
+- **Government** - State-owned media or government sources
+- **Advocacy** - Advocacy organizations
+- **Predatory** - Predatory journals
+- **Community** - Community-created news
+- **Unknown** - Not yet evaluated
+
+<Tip>
+Hover over any icon to see a tooltip explaining what it means. For reliability icons, you can click the icon to view the community consensus page with detailed evaluation.
+</Tip>
+
+## Using the dashboard
+
+Cite Unseen adds an interactive dashboard above reference lists that shows citation counts by category.
+
+### Viewing citation counts
+
+The dashboard displays:
+- Total number of citations in the reference list
+- Count for each category that appears in the article
+- Visual icons matching those shown on citations
+
+### Filtering citations
+
+You can filter the reference list to show only specific categories:
+
+<Steps>
+  <Step title="Click a category in the dashboard">
+    Click any category (e.g., "3 news") to filter the reference list to show only citations from that category.
+  </Step>
+  
+  <Step title="Add multiple filters">
+    Click additional categories to combine filters. Only citations matching **all** selected categories will be displayed.
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    <Info>
+    When multiple filters are active, the dashboard shows how many filters are applied.
+    </Info>
+  </Step>
+  
+  <Step title="Clear filters">
+    Click the selected category again to deselect it, or click "Clear All" to remove all filters at once.
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    You can also press **Escape** to clear all active filters.
+  </Step>
+</Steps>
 
-### Step 2: Deploy your changes
+<Warning>
+Filtering is based on AND logic. If you select "news" and "generally reliable", you'll only see citations that are both news sources AND generally reliable.
+</Warning>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+## Customizing your settings
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+Cite Unseen includes a settings dialog to customize your experience.
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+### Opening settings
 
-### Step 3: Go live
+Look for the "Cite Unseen Settings" button near the reference list (the exact location depends on your Wikipedia skin).
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+### Available settings tabs
+
+#### General settings
+
+- **Show dashboard above reflists** - Toggle the dashboard display on/off
+- **Show suggestions button** - Enable the button for suggesting categorizations
+- **Hide reliability ratings for social media** - Don't show generic reliability ratings for social media from unrated publishers
+- **Show ratings from other languages** - Display reliability ratings from other language Wikipedias even when local ratings exist
+
+#### Categories tab
+
+Enable or disable specific category icons:
+
+```javascript
+window.cite_unseen_categories = {
+    news: true,
+    social: true,
+    blogs: false,  // Disable blog icons
+    unknown: false  // Don't show unknown links
+};
+```
+
+<Tip>
+Disabled categories won't show icons or appear in the dashboard, helping reduce visual clutter.
+</Tip>
+
+#### Additional domains
+
+Add custom domains to categorize sources not in the default lists:
+
+```javascript
+window.cite_unseen_additional_domains = {
+    news: ['example-news.com', 'local-newspaper.org']
+};
+```
+
+#### Additional URL strings
+
+Match sources by URL patterns:
+
+```javascript
+window.cite_unseen_additional_strings = {
+    blogs: ['/blog/', '/opinion/']
+};
+```
+
+#### Ignore domains
+
+Exclude specific domains from categories:
+
+```javascript
+window.cite_unseen_domain_ignore = {
+    news: ['unreliable-news.com']
+};
+```
+
+<Note>
+To apply custom settings persistently, save these configurations in `User:YourUsername/CiteUnseen-Rules.js` on Meta-Wiki (global) or your local wiki (local only).
+</Note>
+
+## Advanced features
+
+### Multi-language reliability ratings
+
+Cite Unseen can display reliability ratings from different language Wikipedias:
+
+- By default, it shows ratings from your current language wiki
+- If no local rating exists, it shows ratings from other language wikis
+- Icons from other languages display a language code indicator (e.g., "EN" for English)
+
+<Info>
+This feature helps you see how different language communities evaluate the same source, though you should primarily rely on your local wiki's consensus.
+</Info>
+
+### Date-based categorization
+
+Cite Unseen supports date-based rules for sources whose reliability changed over time:
+
+```javascript
+// Example from sources.js:
+{
+    url: 'example.com',
+    date: '>=2020-01-01'  // Only match articles from 2020 onwards
+}
+```
+
+Date rules support:
+- Operators: `>=`, `<=`, `>`, `<`, `=`
+- Formats: `YYYY`, `YYYY-MM`, `YYYY-MM-DD`
+- AND conditions (comma): `>=2020,<=2022`
+- OR conditions (semicolon): `<=2015;>=2020`
+
+### Suggesting categorizations
+
+If you find an uncategorized source:
+
+<Steps>
+  <Step title="Enable suggestions mode">
+    Click the "Suggest Categories" button to enable suggestion mode.
+  </Step>
+  
+  <Step title="Click an unknown citation">
+    Citations will become clickable in suggestion mode.
+  </Step>
+  
+  <Step title="Select categories">
+    Choose appropriate categories and optionally add a comment explaining your reasoning.
+  </Step>
+  
+  <Step title="Submit to Meta-Wiki">
+    The system opens a pre-filled edit form on Meta-Wiki where you can submit your suggestion for community review.
+  </Step>
+</Steps>
+
+<Warning>
+For reliability categories, seek consensus on your language wiki's reliable sources page before suggesting changes. Reliability ratings are based on documented community consensus, not individual opinions.
+</Warning>
+
+## Troubleshooting
+
+### Icons not appearing
+
+- Hard reload the page (Ctrl+Shift+R / Cmd+Shift+R)
+- Check that you're logged into Wikipedia
+- Verify the article has citations with URL metadata (COinS)
+- Open browser console (F12) and look for errors
+
+### Dashboard not showing
+
+Check if the dashboard is enabled:
+```javascript
+window.cite_unseen_dashboard = true;
+```
+
+### Wrong categorization
+
+Cite Unseen relies on source lists maintained at [Meta:Cite Unseen/sources](https://meta.wikimedia.org/wiki/Meta:Cite_Unseen/sources). If you notice incorrect categorization, you can suggest improvements through the Meta-Wiki discussion page.
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Full Documentation" icon="book" href="https://meta.wikimedia.org/wiki/Meta:Cite_Unseen">
+    Read comprehensive documentation on Meta-Wiki
+  </Card>
+  <Card title="Source Lists" icon="list" href="https://meta.wikimedia.org/wiki/Meta:Cite_Unseen/sources">
+    View and contribute to categorized source lists
+  </Card>
+  <Card title="GitLab Repository" icon="code" href="https://gitlab.wikimedia.org/kevinpayravi/cite-unseen">
+    Explore the source code and contribute
+  </Card>
+  <Card title="Report Issues" icon="bug" href="https://gitlab.wikimedia.org/kevinpayravi/cite-unseen/-/issues">
+    Report bugs or request features
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

@@ -1,0 +1,144 @@
+---
+title: Installation
+description: Install the Cite Unseen user script on Wikipedia to start evaluating citation reliability at a glance.
+---
+
+# Installing Cite Unseen
+
+Cite Unseen is deployed as a user script on Wikipedia. You can install it globally across all wikis or on individual language versions.
+
+<Note>
+You must have a Wikipedia account to install user scripts. If you don't have an account yet, [create one on Wikipedia](https://en.wikipedia.org/wiki/Special:CreateAccount).
+</Note>
+
+## Global installation (recommended)
+
+Installing globally enables Cite Unseen across all Wikimedia projects using your Meta-Wiki account.
+
+<Steps>
+  <Step title="Navigate to your global JavaScript file">
+    Go to your Meta-Wiki global JavaScript page:
+    ```
+    https://meta.wikimedia.org/wiki/Special:MyPage/global.js
+    ```
+    
+    If you're not logged in, you'll be prompted to log in first.
+  </Step>
+  
+  <Step title="Add the import script">
+    Add the following line to your `global.js` file:
+    
+    ```javascript
+    mw.loader.load('//meta.wikimedia.org/w/index.php?title=User:SuperHamster/CiteUnseen.js&action=raw&ctype=text/javascript');
+    ```
+    
+    <Info>
+    You can also use the bundled version for better performance:
+    
+    ```javascript
+    await mw.loader.getScript('//gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/deploy/cite-unseen-bundled.js?mime=text/javascript');
+    ```
+    </Info>
+  </Step>
+  
+  <Step title="Save the page">
+    Click the "Publish changes" button to save your `global.js` file.
+  </Step>
+  
+  <Step title="Reload Wikipedia">
+    Hard reload any Wikipedia page (Ctrl+Shift+R on Windows/Linux, Cmd+Shift+R on Mac) to see Cite Unseen in action.
+  </Step>
+</Steps>
+
+## Local installation (single wiki)
+
+If you prefer to install Cite Unseen on only one language version of Wikipedia:
+
+<Steps>
+  <Step title="Navigate to your common.js file">
+    Go to your user JavaScript page on your preferred wiki. For example, on English Wikipedia:
+    ```
+    https://en.wikipedia.org/wiki/Special:MyPage/common.js
+    ```
+  </Step>
+  
+  <Step title="Add the import script">
+    Add the following line:
+    
+    ```javascript
+    mw.loader.load('//meta.wikimedia.org/w/index.php?title=User:SuperHamster/CiteUnseen.js&action=raw&ctype=text/javascript');
+    ```
+  </Step>
+  
+  <Step title="Save and reload">
+    Save the page and hard reload any article to activate Cite Unseen.
+  </Step>
+</Steps>
+
+<Warning>
+Make sure you're editing the correct file:
+- For **global** installation: `Special:MyPage/global.js` on Meta-Wiki
+- For **local** installation: `Special:MyPage/common.js` on your target wiki
+</Warning>
+
+## Verifying installation
+
+After installing, you can verify Cite Unseen is working:
+
+1. Navigate to any Wikipedia article with citations (e.g., [Barack Obama](https://en.wikipedia.org/wiki/Barack_Obama))
+2. Scroll to the references section
+3. You should see:
+   - Categorical icons next to each citation
+   - A dashboard above the reference list showing citation counts by category
+
+<Tip>
+If you don't see any icons, try these troubleshooting steps:
+- Make sure you saved your JavaScript file correctly
+- Clear your browser cache and reload the page
+- Check your browser console (F12) for any error messages
+- Verify you're logged into Wikipedia
+</Tip>
+
+## Code structure
+
+Cite Unseen has two deployment options:
+
+### Unbundled version
+
+The main entry point (`main.js`) loads separate files through `gitlab-content.toolforge.org`:
+
+- **main.js**: Entry point and core logic
+- **sources.js**: Loads categorized source lists from Meta-Wiki and processes them
+- **i18n.js**: Translation and localization data
+- **styles.css**: Visual styling for icons and dashboard
+
+### Bundled version
+
+Each release updates the [`deploy`](https://gitlab.wikimedia.org/kevinpayravi/cite-unseen/-/tree/deploy) branch with `cite-unseen-bundled.js`, which combines all components into a single file for faster loading.
+
+## Custom configuration
+
+After installation, you can customize Cite Unseen by creating configuration files:
+
+### Global configuration
+
+Create `User:YourUsername/CiteUnseen-Rules.js` on Meta-Wiki to set global preferences.
+
+### Local configuration
+
+Create `User:YourUsername/CiteUnseen-Rules.js` on your local wiki for wiki-specific settings.
+
+<Note>
+Local settings override global settings. See the [full documentation](https://meta.wikimedia.org/wiki/Meta:Cite_Unseen#Installing) for available configuration options.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quick Start Guide" icon="rocket" href="/quickstart">
+    Learn how to use Cite Unseen features effectively
+  </Card>
+  <Card title="Full Documentation" icon="book" href="https://meta.wikimedia.org/wiki/Meta:Cite_Unseen">
+    Explore advanced configuration and customization options
+  </Card>
+</CardGroup>

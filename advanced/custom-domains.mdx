@@ -1,0 +1,258 @@
+---
+title: Custom Domains & URL Strings
+description: Add custom domains and URL patterns to categorize citations from additional sources
+---
+
+Cite Unseen allows you to extend its categorization rules by adding custom domains and URL patterns. This is useful when you want to mark citations from specific websites that aren't yet included in the default ruleset.
+
+## Configuration Variables
+
+There are two global configuration variables you can set:
+
+- **`cite_unseen_additional_domains`**: Adds domains that will match the full domain and subdomains
+- **`cite_unseen_additional_strings`**: Adds URL patterns that match any part of the URL
+
+## Additional Domains
+
+Use `cite_unseen_additional_domains` to add complete domain names. The script will automatically match the domain and all its subdomains.
+
+### Syntax
+
+```javascript
+window.cite_unseen_additional_domains = {
+  categoryName: ['domain1.com', 'domain2.org'],
+  anotherCategory: 'single-domain.net'
+};
+```
+
+### How Domain Matching Works
+
+Domains are converted to regular expressions that match URLs using this pattern:
+
+```javascript
+// From main.js:236-238
+function urlRegex(string) {
+  return new RegExp('https?:\\/\\/([^\\/]*\\.)?' + escapeRegex(string) + '($|((?<=\\.)|\\/))'); 
+}
+```
+
+This means:
+- `example.com` matches `https://example.com` and `https://www.example.com`
+- Subdomains are automatically included
+- Both HTTP and HTTPS protocols are matched
+
+### Example: Adding News Domains
+
+```javascript
+window.cite_unseen_additional_domains = {
+  news: [
+    'localnewssite.com',
+    'regionaldaily.org',
+    'citynews.net'
+  ]
+};
+```
+
+Citations from these domains will be marked with the news icon.
+
+### Example: Adding Social Media Platforms
+
+```javascript
+window.cite_unseen_additional_domains = {
+  social: [
+    'mastodon.social',
+    'bsky.app',
+    'threads.net'
+  ]
+};
+```
+
+## Additional URL Strings
+
+Use `cite_unseen_additional_strings` to match specific URL patterns or path segments.
+
+### Syntax
+
+```javascript
+window.cite_unseen_additional_strings = {
+  categoryName: ['/pattern1/', '/pattern2/'],
+  anotherCategory: '/single-pattern/'
+};
+```
+
+### How String Matching Works
+
+URL strings are matched using simple substring inclusion:
+
+```javascript
+// From main.js:339-344
+function matchUrlString(coins, rule) {
+  if (typeof rule['url_str'] !== 'string' || rule['url_str'] === '') return false;
+  const rftIds = ensureArray(coins['rft_id']);
+  if (rftIds.length === 0) return false;
+  return rftIds.some(rftId => rftId.includes(rule['url_str']));
+}
+```
+
+This allows you to:
+- Match specific URL paths
+- Match query parameters
+- Match any substring in the URL
+
+### Example: Matching Blog Paths
+
+```javascript
+window.cite_unseen_additional_strings = {
+  blogs: [
+    '/blog/',
+    '/posts/',
+    '/author/',
+    'medium.com/@'
+  ]
+};
+```
+
+### Example: Matching Opinion Sections
+
+```javascript
+window.cite_unseen_additional_strings = {
+  opinions: [
+    '/opinion/',
+    '/commentary/',
+    '/editorial/',
+    '/op-ed/'
+  ]
+};
+```
+
+## Available Categories
+
+You can add custom domains and strings to any of these category types:
+
+<Tabs>
+  <Tab title="Reliability">
+    - `blacklisted`
+    - `deprecated` 
+    - `generallyUnreliable`
+    - `marginallyReliable`
+    - `generallyReliable`
+    - `multi` (no consensus)
+  </Tab>
+  <Tab title="Type">
+    - `advocacy`
+    - `aiGenerated`
+    - `aiReferred`
+    - `blogs`
+    - `community`
+    - `editable`
+    - `government`
+    - `news`
+    - `opinions`
+    - `predatory`
+    - `press`
+    - `satire`
+    - `social`
+    - `sponsored`
+    - `tabloids`
+    - `tvPrograms`
+  </Tab>
+</Tabs>
+
+## Complete Example
+
+Here's a comprehensive example combining both approaches:
+
+```javascript
+// Add custom domains
+window.cite_unseen_additional_domains = {
+  news: [
+    'mynewssite.com',
+    'localnews.org'
+  ],
+  blogs: [
+    'myblog.com',
+    'personalblog.net'
+  ],
+  social: [
+    'newplatform.social'
+  ]
+};
+
+// Add custom URL patterns
+window.cite_unseen_additional_strings = {
+  blogs: [
+    '/blog/',
+    '/author/'
+  ],
+  opinions: [
+    '/opinion/',
+    '/commentary/'
+  ],
+  press: [
+    '/press-release/',
+    '/pressroom/'
+  ]
+};
+```
+
+## How Categories Are Applied
+
+When processing citations, Cite Unseen checks custom domains and strings first before checking the built-in rules:
+
+```javascript
+// From main.js:466-496
+function findTypeMatches(coins, filteredCategorizedRules, typeCategories) {
+  const matches = [];
+  
+  for (const category of typeCategories) {
+    let hasMatch = false;
+    
+    // Check custom domains first
+    if (window.cite_unseen_additional_domains &&
+        window.cite_unseen_additional_domains[category]) {
+      const customDomains = ensureArray(window.cite_unseen_additional_domains[category]);
+      for (const domain of customDomains) {
+        const customRule = { 'url': domain };
+        if (match(coins, customRule)) {
+          hasMatch = true;
+          break;
+        }
+      }
+    }
+    
+    // Then check custom URL strings
+    if (!hasMatch && window.cite_unseen_additional_strings &&
+        window.cite_unseen_additional_strings[category]) {
+      const customStrings = ensureArray(window.cite_unseen_additional_strings[category]);
+      for (const urlStr of customStrings) {
+        const customRule = { 'url_str': urlStr };
+        if (match(coins, customRule)) {
+          hasMatch = true;
+          break;
+        }
+      }
+    }
+    
+    // Finally check built-in categorizations
+    if (!hasMatch && filteredCategorizedRules[category]) {
+      // ... check built-in rules
+    }
+  }
+  
+  return matches;
+}
+```
+
+<Note>
+Custom domains and URL strings are checked **before** built-in rules, so they take priority in categorization.
+</Note>
+
+## Configuration File Location
+
+To apply these settings:
+
+1. Create a page at `User:YourUsername/CiteUnseen-Rules.js` on your wiki
+2. Add your configuration variables
+3. The settings will load automatically when you use Cite Unseen
+
+See [Configuration](/advanced/configuration) for more details on setting up your rules file.

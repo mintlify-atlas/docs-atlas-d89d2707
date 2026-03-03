@@ -1,0 +1,314 @@
+---
+title: Understanding categories
+description: Learn about the different category types that Cite Unseen uses to mark citations
+---
+
+Cite Unseen automatically analyzes citations on Wikipedia articles and marks them with categorical icons. These categories help you quickly evaluate the reliability and type of sources used in articles.
+
+## Reliability categories
+
+Reliability categories are based on community consensus documented on various Wikipedia reliability project pages. These categories indicate the community's assessment of a source's trustworthiness.
+
+<Accordion title="Blacklisted">
+Sources that have been blacklisted due to persistent abuse, typically in the form of spam external links.
+
+**Icon color:** Red circle with X
+
+**What this means:** These sources should not be used and may be automatically blocked from Wikipedia.
+
+**Example sources:** Domains that have been blocked site-wide for spam or abuse.
+</Accordion>
+
+<Accordion title="Deprecated">
+Sources that are deprecated and should not be used. They may still be acceptable for non-controversial self-descriptions or expert self-published content.
+
+**Icon color:** Red/orange warning triangle
+
+**What this means:** Avoid using these sources except in very specific circumstances.
+
+**Example sources:** Outlets that have lost credibility due to editorial failures or persistent reliability issues.
+</Accordion>
+
+<Accordion title="Generally unreliable">
+Sources that are generally considered unreliable by the community. They may still be used for non-controversial self-descriptions or expert self-published content.
+
+**Icon color:** Red X
+
+**What this means:** These sources lack editorial oversight, fact-checking, or have a history of publishing inaccurate information.
+
+**Common categories:**
+- News aggregators without original reporting
+- Publications with poor fact-checking records
+- Sources with significant conflicts of interest
+</Accordion>
+
+<Accordion title="Marginally reliable">
+Sources with mixed reliability that need to be reviewed on a case-by-case basis to determine reliability in each context.
+
+**Icon color:** Yellow warning triangle
+
+**What this means:** Use caution. These sources may be reliable for some topics but not others.
+
+**Example situations:**
+- Video game news sites (reliable for gaming topics, not for general news)
+- Trade publications (reliable within their industry)
+- Regional newspapers (reliable for local coverage)
+</Accordion>
+
+<Accordion title="No consensus">
+Sources where there is no consensus in the community about reliability. Reliability may depend on subject area, author, or publication time.
+
+**Icon color:** Blue circle with question mark
+
+**What this means:** You need to evaluate the specific use case and consider factors like the topic, author credentials, and context.
+
+**Factors affecting reliability:**
+- Subject matter expertise
+- Individual author qualifications
+- Time period of publication
+- Type of content (news vs. opinion vs. analysis)
+</Accordion>
+
+<Accordion title="Generally reliable">
+Sources that editors generally agree are reliable on topics in their area of expertise.
+
+**Icon color:** Green checkmark
+
+**What this means:** These sources have editorial oversight, fact-checking processes, and a reputation for accuracy.
+
+**Common characteristics:**
+- Professional editorial staff
+- Fact-checking procedures
+- Corrections policy
+- Reputation for accuracy
+</Accordion>
+
+## Type categories
+
+Type categories describe the nature or format of a source rather than its reliability. A source can have multiple type categories.
+
+### Content format types
+
+<Tabs>
+  <Tab title="News">
+  Sources from outlets whose primary purpose is journalistic reporting on current/recent events, under an editorial process.
+
+  **Icon:** Newspaper
+
+  **Examples from sources.js:**
+  - Major newspapers (The New York Times, The Guardian)
+  - News agencies (Associated Press, Reuters)
+  - Online news outlets (BBC News, CNN)
+
+  <Note>A news designation doesn't automatically mean reliability. Check reliability categories separately.</Note>
+  </Tab>
+
+  <Tab title="Books">
+  Publications such as books, journals, or other printed material.
+
+  **Icon:** Book
+
+  **Detection:** Cite Unseen identifies these through CSS classes like `book`, `journal`, `encyclopaedia`, `conference`, `thesis`, or `magazine`.
+
+  **Examples:**
+  - Academic journals
+  - Published books
+  - Conference proceedings
+  - Theses and dissertations
+  </Tab>
+
+  <Tab title="Blogs">
+  Blog posts and personal websites.
+
+  **Icon:** Pencil/writing symbol
+
+  **Common sources:** Personal blogs, Medium posts, Substack newsletters
+
+  <Warning>Blog posts are typically considered self-published sources and may not be reliable unless written by recognized experts.</Warning>
+  </Tab>
+
+  <Tab title="Social media">
+  Social media websites, possibly including individual social media posts.
+
+  **Icon:** Network/share symbol
+
+  **Examples from sources.js:**
+  - Twitter/X posts
+  - Facebook posts
+  - Instagram content
+  - TikTok videos
+  - Reddit threads
+
+  <Warning>Social media posts are generally not considered reliable sources except for direct quotes or verified statements by notable individuals.</Warning>
+  </Tab>
+
+  <Tab title="TV programs">
+  TV or radio programs. Reliability depends on the individual program.
+
+  **Icon:** Television
+
+  **Detection:** Identified through CSS classes like `episode`, `podcast`, or `media`.
+
+  **Examples:**
+  - Television news programs
+  - Documentaries
+  - Radio shows
+  - Podcasts
+  </Tab>
+</Tabs>
+
+### Special content types
+
+<Accordion title="Opinions">
+Opinion pieces, editorials, and columns.
+
+**Icon:** Speech bubble
+
+**What this means:** The content represents the author's opinion rather than factual reporting. Even from reliable sources, opinions should be attributed to the author.
+
+**Usage:** Can be used for attributed opinions but not for stating facts.
+</Accordion>
+
+<Accordion title="Press releases">
+Official press releases from organizations.
+
+**Icon:** Megaphone
+
+**Detection:** Identified through the CSS class `pressrelease`.
+
+<Warning>Press releases are promotional material and should be used cautiously. They're acceptable for basic facts about the issuing organization but not for independent verification.</Warning>
+</Accordion>
+
+<Accordion title="Sponsored content">
+Sponsored content or promotional material.
+
+**Icon:** Dollar sign
+
+**What this means:** The content was paid for by an advertiser and may not maintain editorial independence.
+
+<Warning>Sponsored content should generally not be used as a source for Wikipedia content.</Warning>
+</Accordion>
+
+### Concern categories
+
+<Accordion title="Editable sources">
+Sources that are editable by the community (e.g., wikis or databases).
+
+**Icon:** Pencil with page
+
+**Examples:**
+- Other wikis
+- User-editable databases
+- Collaborative platforms
+
+<Warning>Editable sources lack editorial control and can be changed by anyone. They're generally not acceptable as reliable sources.</Warning>
+</Accordion>
+
+<Accordion title="AI-generated content">
+Sources associated with unedited AI-generated content. This may include websites that publish substantial AI-generated material without human editorial oversight.
+
+**Icon:** Robot/AI symbol
+
+**What this means:** The content may be generated by AI without adequate human review, which can lead to factual errors or "hallucinations."
+
+<Warning>AI-generated content without editorial oversight is not considered a reliable source.</Warning>
+</Accordion>
+
+<Accordion title="AI-referred">
+The URL includes tracking parameters (such as `utm_source=chatgpt.com`) indicating it was copied from an AI assistant.
+
+**Icon:** Robot with link symbol
+
+**What this means:** The source was obtained through an AI assistant. The associated text may also be AI-generated, and the source may or may not corroborate the given statements.
+
+<Info>This doesn't necessarily mean the source itself is unreliable, but it flags that extra verification may be needed.</Info>
+</Accordion>
+
+<Accordion title="Advocacy organizations">
+Sources from advocacy organizations.
+
+**Icon:** Raised fist or banner
+
+**What this means:** The source has a specific viewpoint or agenda they're promoting.
+
+**Usage considerations:**
+- Can be used for the organization's own positions
+- Should not be used as independent verification
+- May lack neutrality on related topics
+</Accordion>
+
+<Accordion title="Government sources">
+State-owned or state-run media, or government sources.
+
+**Icon:** Government building
+
+**What this means:** The source is controlled or funded by a government, which may affect editorial independence.
+
+**Usage:** Acceptable for official government positions and statistics, but consider potential bias on politically sensitive topics.
+</Accordion>
+
+<Accordion title="Predatory journals">
+Sources from predatory journals.
+
+**Icon:** Warning symbol with document
+
+**What this means:** These are academic-looking journals that lack proper peer review and publish articles for profit without maintaining quality standards.
+
+<Warning>Predatory journals should not be used as sources. They lack the editorial oversight expected of academic publications.</Warning>
+</Accordion>
+
+<Accordion title="Tabloids">
+Tabloid or gossip news.
+
+**Icon:** Sensational newspaper
+
+**What this means:** These publications prioritize entertainment over accuracy and often publish unverified claims.
+
+**Examples:** Celebrity gossip magazines, sensationalist newspapers
+
+<Warning>Tabloids are generally unreliable and should be avoided except for information about themselves.</Warning>
+</Accordion>
+
+<Accordion title="Satire">
+Sources that publish satirical or parody content.
+
+**Icon:** Comedy masks
+
+**What this means:** The content is intentionally fictional or exaggerated for humor.
+
+**Examples:** The Onion, The Borowitz Report
+
+<Warning>Satirical sources should never be used for factual claims. They can only be used when discussing the satire itself.</Warning>
+</Accordion>
+
+<Accordion title="Community news">
+Community-created news.
+
+**Icon:** Group of people
+
+**What this means:** News content created by community members rather than professional journalists.
+
+**Examples:** Citizen journalism platforms, community news sites
+
+**Reliability:** Varies widely depending on editorial oversight and verification processes.
+</Accordion>
+
+## Unknown sources
+
+Citations that Cite Unseen cannot categorize are marked as "unknown." This doesn't mean the source is unreliable—it simply means it hasn't been evaluated yet.
+
+**Icon:** Question mark
+
+**What to do:** You'll need to manually evaluate these sources using Wikipedia's reliability guidelines. Consider suggesting categorization to help improve Cite Unseen's database.
+
+## Multiple categories
+
+A citation can have multiple categories. For example, a blog post from a news website might show both "news" and "blogs" icons. A social media post from a deprecated source might show both "social" and "deprecated" icons.
+
+<Tip>When a citation has multiple categories, pay special attention to any reliability indicators (red, yellow, or green icons) as these are the most important for evaluating source quality.</Tip>
+
+## Language indicators
+
+When a reliability rating comes from a different language Wikipedia's source evaluation project, you'll see a language code (like "EN" or "ZH") next to the reliability icon. This indicates which Wikipedia community made the reliability assessment.
+
+**Why this matters:** Different language Wikipedias may have different perspectives on source reliability, especially for regional sources.

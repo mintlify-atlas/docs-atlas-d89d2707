@@ -1,0 +1,353 @@
+---
+title: Localization & Translation
+description: How Cite Unseen supports multiple languages and handles translation
+---
+
+Cite Unseen is available in 16 languages with full interface localization. The translation system automatically detects your Wikipedia language and displays the appropriate interface text.
+
+## Supported Languages
+
+Cite Unseen currently supports these languages:
+
+<Tabs>
+  <Tab title="European">
+    - **English** (`en`)
+    - **Polish** (`pl`)
+    - **Portuguese** (`pt`)
+    - **Turkish** (`tr`)
+    - **Piedmontese** (`pms`)
+    - **Irish** (`ga`)
+    - **Macedonian** (`mk`)
+  </Tab>
+  <Tab title="Asian & Middle Eastern">
+    - **Arabic** (`ar`)
+    - **Urdu** (`ur`)
+    - **Pashto** (`ps`)
+    - **Indonesian** (`id`)
+    - **Japanese** (`ja`)
+    - **Korean** (`ko`)
+  </Tab>
+  <Tab title="Chinese Variants">
+    - **Simplified Chinese** (`zh-hans`)
+    - **Traditional Chinese** (`zh-hant`)
+    - **Cantonese** (`yue-hant`)
+  </Tab>
+</Tabs>
+
+## Translation System
+
+### Translation Files
+
+Translations are stored as JSON files in the `i18n/` directory:
+
+```javascript
+// From i18n.js:6-7
+const FOLDER = 'i18n';
+const API_BASE = 'https://gitlab.wikimedia.org/api/v4/projects/kevinpayravi%2Fcite-unseen/repository';
+```
+
+Each language has its own JSON file:
+- `en.json` - English
+- `ja.json` - Japanese  
+- `zh-hans.json` - Simplified Chinese
+- `zh-hant.json` - Traditional Chinese
+- `ar.json` - Arabic
+- `ko.json` - Korean
+- And 10 more...
+
+### Translation Structure
+
+Translation files use a flat structure with dot-notation keys:
+
+```json
+{
+  "settingsButton": "Cite Unseen Settings",
+  "cancel": "Cancel",
+  "save": "Save",
+  "categoryHints.news": "This source is from an outlet whose primary purpose is journalistic reporting",
+  "categoryLabels.news": "news",
+  "citationTooltipPrefix": "From",
+  "citationTooltipSuffix": ":"
+}
+```
+
+### How Translations Are Loaded
+
+The translation system loads and caches all language files:
+
+```javascript
+// From i18n.js:92-107
+async function buildI18nObject() {
+  const files = await listI18nFiles();
+  const result = {};
+  
+  await Promise.all(files.map(async f => {
+    const langCode = f.name.replace(/\.json$/i, '');
+    try {
+      const flat = await fetchJsonFile(`${FOLDER}/${f.name}`);
+      mergeLanguageData(result, langCode, flat);
+    } catch (e) {
+      console.error('[Cite Unseen][i18n] Error fetching language file', f.name, e);
+    }
+  }));
+  
+  return result;
+}
+```
+
+### Translation Caching
+
+Translations are cached in localStorage for 72 hours:
+
+```javascript
+// From i18n.js:8-9
+const CACHE_KEY = 'CiteUnseenI18nCache-v2.1.6';
+const CACHE_TTL_MS = 72 * 60 * 60 * 1000; // 72 hours
+```
+
+This reduces network requests and improves performance.
+
+## Language Detection
+
+Cite Unseen automatically detects your Wikipedia language using MediaWiki's configuration:
+
+```javascript
+// From main.js:1409-1420
+const lang = mw.config.get('wgContentLanguage');
+CiteUnseen.convByVar = function (i18nDict) {
+  const locale = new Intl.Locale(lang);
+  if (locale.language === 'zh') {
+    if (locale.script === 'Hans') {
+      return i18nDict['hans'] || i18nDict['hant'] || i18nDict['en'] || 'Language undefined!';
+    } else {
+      return i18nDict['hant'] || i18nDict['hans'] || i18nDict['en'] || 'Language undefined!';
+    }
+  }
+  return i18nDict[lang] || i18nDict['en'] || 'Language undefined!';
+};
+```
+
+### Fallback Chain
+
+If a translation is missing, Cite Unseen falls back in this order:
+
+1. **Current language** - e.g., `ja` for Japanese Wikipedia
+2. **English** (`en`) - Default fallback for all languages
+3. **"Language undefined!"** - Error message if no translation exists
+
+### Special Case: Chinese Wikipedia
+
+Chinese Wikipedia uses a special integration with HanAssist for variant conversion:
+
+```javascript
+// From main.js:1402-1407
+if (mw.config.get('wgServer') === "//zh.wikipedia.org") {
+  // On Chinese Wikipedia, prioritize using the ext.gadget.HanAssist module
+  await mw.loader.using('ext.gadget.HanAssist', function (require) {
+    const { convByVar } = require('ext.gadget.HanAssist');
+    CiteUnseen.convByVar = convByVar;
+  });
+}
+```
+
+This provides seamless conversion between Simplified (`hans`) and Traditional (`hant`) Chinese.
+
+## Translation Keys
+
+The translation system organizes keys by function:
+
+### Interface Elements
+
+```javascript
+// From en.json
+{
+  "settingsButton": "Cite Unseen Settings",
+  "settingsButtonTooltip": "Configure Cite Unseen settings.",
+  "save": "Save",
+  "cancel": "Cancel",
+  "loading": "Loading...",
+  "saving": "Saving..."
+}
+```
+
+### Category Hints
+
+Tooltips that appear when hovering over icons:
+
+```javascript
+{
+  "categoryHints.news": "This source is from an outlet whose primary purpose is journalistic reporting",
+  "categoryHints.blogs": "This source is a blog post.",
+  "categoryHints.social": "This source is a social media website, possibly a social media post.",
+  "categoryHints.generallyReliable": "Editors generally agree that this source is reliable"
+}
+```
+
+### Category Labels
+
+Short labels shown in the dashboard:
+
+```javascript
+{
+  "categoryLabels.news": "news",
+  "categoryLabels.blogs": "blog post(s)",
+  "categoryLabels.social": "social media",
+  "categoryLabels.generallyReliable": "generally reliable"
+}
+```
+
+### Dashboard Strings
+
+```javascript
+{
+  "showing": "Showing",
+  "of": "of",
+  "totalCitations": "Total",
+  "citationSingular": "citation",
+  "citationPlural": "citations",
+  "clearAllFilters": "Clear All",
+  "filterToggleTooltip": "Click to toggle this category filter"
+}
+```
+
+## Using Translations
+
+Translations are accessed through the `convByVar` function:
+
+```javascript
+// From main.js:689
+let message = CiteUnseen.convByVar(CiteUnseenI18n.categoryHints[type]);
+```
+
+The `CiteUnseenI18n` object contains all loaded translations:
+
+```javascript
+// Example structure after loading
+CiteUnseenI18n = {
+  categoryHints: {
+    news: {
+      en: "This source is from an outlet whose primary purpose is journalistic reporting",
+      ja: "このソースはジャーナリズムを主な目的とする報道機関からのものです",
+      zh-hans: "此来源来自以新闻报道为主要目的的媒体"
+    }
+  },
+  settingsButton: {
+    en: "Cite Unseen Settings",
+    ja: "Cite Unseen 設定",
+    zh-hans: "Cite Unseen 设置"
+  }
+}
+```
+
+## Plural Handling
+
+English translations include a special plural marker `(s)` that is dynamically processed:
+
+```javascript
+// From main.js:755-757
+function parseI18nPlural(string, value) {
+  return string.replace(/\(s\)/g, value === 1 ? '' : 's');
+}
+```
+
+Example usage:
+
+```javascript
+// From en.json
+{
+  "categoryLabels.blogs": "blog post(s)",
+  "categoryLabels.press": "press release(s)"
+}
+
+// Usage in code
+const label = parseI18nPlural(convByVar(CiteUnseenI18n.categoryLabels.blogs), 1);
+// Result: "blog post" (singular)
+
+const label = parseI18nPlural(convByVar(CiteUnseenI18n.categoryLabels.blogs), 5);
+// Result: "blog posts" (plural)
+```
+
+<Note>
+The plural handling is currently only implemented for English. Other languages should provide separate singular and plural forms or handle pluralization in their own way.
+</Note>
+
+## Translation File Format
+
+Each language file follows this structure:
+
+<CodeGroup>
+```json en.json (English)
+{
+  "additionalDomains": "Additional Domains (one per line)",
+  "cancel": "Cancel",
+  "save": "Save",
+  "categoryHints.news": "This source is from an outlet whose primary purpose is journalistic reporting",
+  "categoryLabels.news": "news",
+  "citationPlural": "citations",
+  "citationSingular": "citation"
+}
+```
+
+```json ja.json (Japanese)
+{
+  "additionalDomains": "追加ドメイン（1行に1つ）",
+  "cancel": "キャンセル",
+  "save": "保存",
+  "categoryHints.news": "このソースはジャーナリズムを主な目的とする報道機関からのものです",
+  "categoryLabels.news": "ニュース",
+  "citationPlural": "件の出典",
+  "citationSingular": "件の出典"
+}
+```
+
+```json zh-hans.json (Simplified Chinese)
+{
+  "additionalDomains": "附加域名（每行一个）",
+  "cancel": "取消",
+  "save": "保存",
+  "categoryHints.news": "此来源来自以新闻报道为主要目的的媒体",
+  "categoryLabels.news": "新闻",
+  "citationPlural": "条引用",
+  "citationSingular": "条引用"
+}
+```
+</CodeGroup>
+
+## Contributing Translations
+
+To add or improve translations:
+
+1. **Find the language file** in the `i18n/` directory on GitLab
+2. **Copy the structure** from `en.json` as a reference
+3. **Translate all keys** while preserving the JSON structure
+4. **Test locally** by updating your browser's language settings
+5. **Submit via GitLab** or propose changes through Meta-Wiki
+
+### Translation Guidelines
+
+- Keep technical terms consistent (e.g., "dashboard", "filter")
+- Match the tone: concise and informative
+- Test with actual citations to ensure clarity
+- Consider character length for UI elements
+- Use gender-neutral language where applicable
+
+## Global Exposure
+
+The i18n system exposes a global promise for consumers:
+
+```javascript
+// From i18n.js:154-156
+window.CiteUnseenI18n = window.CiteUnseenI18n || {};
+window.CiteUnseenI18nPromise = load();
+```
+
+This allows the main script to wait for translations to load:
+
+```javascript
+// From main.js:1424
+await mw.loader.getScript('//gitlab-content.toolforge.org/kevinpayravi/cite-unseen/-/raw/main/i18n.js');
+```
+
+<Note>
+All translations are loaded asynchronously during script initialization. The main script waits for translations to be available before displaying any UI elements.
+</Note>
